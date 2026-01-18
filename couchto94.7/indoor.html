@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Command Center | Couch to 94.7</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
+    <style>
+        :root {
+            --sky-blue: #00B4D8;
+            --light-blue: #81d4fa;
+            --dark-blue: #01579b;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #e0e0e0;
+            --success: #00C851;
+            --warning: #FF4136;
+        }
+         nav {
+            width: 100%;
+            background: #0f0f0f;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 3px solid var(--sky-blue);
+        }
+
+        nav a {
+            color: var(--muted-text);
+            text-decoration: none;
+            margin: 0 18px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active { color: var(--sky-blue); }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 30px;
+            background: linear-gradient(to bottom, rgba(0,180,216,0.12), transparent);
+        }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            font-family: 'Impact', sans-serif;
+            margin: 0; padding: 20px;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            font-family: 'Impact', sans-serif;
+            margin: 0; padding: 20px;
+        }
+
+        /* Top Status Bar */
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        #sync-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            background: var(--warning);
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        .sync-active { background: var(--success) !important; box-shadow: 0 0 10px var(--success); }
+
+        .controls {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--sky-blue);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        select, input {
+            background: #222;
+            border: 2px solid var(--sky-blue);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .btn-main {
+            background: var(--sky-blue);
+            color: black;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            font-size: 2rem;
+            background: var(--sky-blue);
+            color: black;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0,180,216,0.5);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--sky-blue);
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 5px solid var(--sky-blue);
+        }
+
+        .chart-container { height: 350px; position: relative; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .stat-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: var(--sky-blue); }
+
+        #coach-msg {
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 15px 0;
+            color: var(--sky-blue);
+            text-shadow: 2px 2px #000;
+        }
+       
+    </style>
+   <nav>
+    <a href="index.html">Home</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="physical.html">Physical</a>
+    <a href="Sensor.html">Sensors</a>
+    <a href="indoor.html">Indoor</a>
+    <a href="climbs.html">Climbs</a>
+    <a href="outdoor.html" class="active">Outdoor</a>
+    <a href="injury.html">Injury</a>
+    <a href="mindset.html">Mindset</a>
+</nav>
+</head>
+<body>
+    <header>
+        <h1 id="workout-title">Indoor Training</h1>
+        <p id="workout-desc">Select a profile to begin your session</p>
+    </header>
+    <div class="status-header">
+        <div style="font-size: 1.2rem;">COUCH TO 94.7 | <span id="workout-name">Select Profile</span></div>
+        <button id="sync-indicator" onclick="checkSensors()">SYNC SENSORS: OFFLINE</button>
+    </div>
+
+    <div class="controls">
+        <select id="workout-select" onchange="loadWorkout()">
+            <option value="endurance">Endurance Base</option>
+            <option value="climb">Climbing Power</option>
+            <option value="speed">Speed Intervals</option>
+            <option value="attack">Attack Simulation</option>
+            <option value="ftptest">Standard FTP Test</option>
+        </select>
+        
+        <div>
+            <label>Initial FTP:</label>
+            <input type="number" id="initial-ftp" value="150" style="width: 70px;">
+        </div>
+        <div>
+            <label>Latest FTP:</label>
+            <input type="number" id="latest-ftp" value="150" style="width: 70px;" onchange="loadWorkout()">
+        </div>
+
+        
+
+        <button class="btn-main" onclick="startWorkout()">Start Ride</button>
+        <button class="btn-main" style="background:#444; color:white;" onclick="resetRide()">New Ride</button>
+    </div>
+
+    <div id="coach-msg">READY TO RIDE</div>
+
+    <div class="chart-card">
+        <div class="chart-container">
+            <canvas id="workoutChart"></canvas>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Power Tgt/Live</div><div class="stat-value"><span id="t-watts">0</span>/<span id="l-watts">0</span></div></div>
+        <div class="stat-box"><div class="stat-label">Cad Live</div><div class="stat-value" id="l-cad">0</div></div>
+        <div class="stat-box"><div class="stat-label">Speed km/h</div><div class="stat-value" id="l-speed">0.0</div></div>
+        <div class="stat-box"><div class="stat-label">Distance km</div><div class="stat-value" id="l-dist">0.00</div></div>
+        <div class="stat-box"><div class="stat-label">Time Remaining</div><div class="stat-value" id="time-rem">00:00</div></div>
+    </div>
+
+    <script>
+        let workoutChart;
+        let workoutData = [], cadenceTargets = [], performanceData = [], blockColors = [];
+        let currentTime = 0, totalDist = 0, activeInterval = null;
+        
+
+        const PROFILES = {
+            endurance: [ {m:10, p:0.6, c:90}, {m:2, p:1.0, c:100}, {m:5, p:0.5, c:80}, {m:10, p:0.75, c:90}, {m:3, p:0.6, c:90} ],
+            climb: [ {m:10, p:0.6, c:85}, {m:3, p:1.2, c:100}, {m:5, p:0.5, c:80}, {m:5, p:1.2, c:90}, {m:7, p:0.6, c:85} ],
+            speed: [ {m:10, p:0.6, c:90}, {m:2, p:1.4, c:120}, {m:5, p:0.5, c:80}, {m:3, p:1.4, c:120}, {m:10, p:0.6, c:90} ],
+            attack: [ {m:10, p:0.5, c:90}, {m:5, p:1.3, c:120}, {m:5, p:0.5, c:80}, {m:7, p:1.2, c:120}, {m:3, p:0.6, c:90} ],
+            ftptest: [ {m:10, p:0.6, c:90}, {m:20, p:1.0, c:0}, {m:10, p:0.6, c:80} ] // FTP profile: 10 min warmup, 20 min hard (no targets), 10 min cooldown
+        };
+
+        function loadWorkout() {
+            const type = document.getElementById('workout-select').value;
+            const latest = parseInt(document.getElementById('latest-ftp').value) || 150;
+            const initial = parseInt(document.getElementById('initial-ftp').value) || 150;
+            
+            workoutData = []; cadenceTargets = []; performanceData = []; blockColors = [];
+            
+            PROFILES[type].forEach((b) => {
+                const totalSeconds = Math.round(b.m * 60);
+                const color = b.p >= 1.0 ? 'rgba(1, 87, 155, 0.7)' : 'rgba(129, 212, 250, 0.7)';
+                for (let s = 0; s < totalSeconds; s++) {
+                    workoutData.push(Math.round(latest * b.p));
+                    cadenceTargets.push(b.c);
+                    performanceData.push(null);
+                    blockColors.push(color);
+                }
+            });
+            
+            document.getElementById('workout-name').innerText = type.toUpperCase().replace('ftptest', 'FTP TEST');
+            currentTime = 0; totalDist = 0;
+            renderChart();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('workoutChart').getContext('2d');
+            if (workoutChart) workoutChart.destroy();
+            
+            const labels = workoutData.map((_, i) => (i % 60 === 0) ? Math.floor(i/60) : "");
+
+            workoutChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            label: 'Target', data: workoutData, stepped: true, fill: true, 
+                            pointRadius: 0, borderWidth: 0, 
+                            segment: { backgroundColor: c => blockColors[c.p0DataIndex] } 
+                        },
+                        { 
+                            label: 'Rider', data: performanceData, borderColor: '#FFFFFF', 
+                            borderWidth: 8, pointRadius: 0, spanGaps: false 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { 
+                        x: { grid: { display: false }, ticks: { color: '#888' }, title: { display: true, text: 'MINUTES', color: '#555' } },
+                        y: { beginAtZero: true, grid: { color: '#333' } } 
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function checkSensors() {
+            const p = localStorage.getItem('power');
+            const indicator = document.getElementById('sync-indicator');
+            if (p !== null) {
+                indicator.innerText = "SENSORS: PAIRED & ACTIVE";
+                indicator.classList.add('sync-active');
+            } else {
+                indicator.innerText = "SENSORS: OFFLINE";
+                indicator.classList.remove('sync-active');
+            }
+        }
+
+        function startWorkout() {
+            if (activeInterval) clearInterval(activeInterval);
+            activeInterval = setInterval(updateRide, 1000);
+            checkSensors();
+        }
+
+        function updateRide() {
+            if (currentTime >= workoutData.length) return resetRide();
+
+            let liveW = parseInt(localStorage.getItem('power'));
+            let liveC = parseInt(localStorage.getItem('cadence'));
+            
+            if (isNaN(liveW)) liveW = workoutData[currentTime] + (Math.random() * 6 - 3);
+            if (isNaN(liveC)) liveC = cadenceTargets[currentTime] + (Math.random() * 4 - 2);
+
+            const speed = (liveW / 6) + 10;
+            totalDist += (speed / 3600);
+
+            document.getElementById('t-watts').innerText = workoutData[currentTime];
+            document.getElementById('l-watts').innerText = Math.round(liveW);
+            document.getElementById('l-cad').innerText = Math.round(liveC);
+            document.getElementById('l-speed').innerText = speed.toFixed(1);
+            document.getElementById('l-dist').innerText = totalDist.toFixed(2);
+            document.getElementById('time-rem').innerText = formatTime(workoutData.length - currentTime);
+
+            performanceData[currentTime] = liveW;
+            workoutChart.update('none');
+
+            const msg = document.getElementById('coach-msg');
+            if (liveW < workoutData[currentTime] - 10) { msg.innerText = "MORE POWER!"; msg.style.color = "var(--warning)"; }
+            else { msg.innerText = "KEEP IT THERE!"; msg.style.color = "var(--success)"; }
+
+            currentTime++;
+        }
+
+        function resetRide() {
+            clearInterval(activeInterval);
+            activeInterval = null;
+            loadWorkout();
+            document.getElementById('coach-msg').innerText = "READY TO RIDE";
+            document.getElementById('l-dist').innerText = "0.00";
+            document.getElementById('time-rem').innerText = "00:00";
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s/60);
+            const rs = s%60;
+            return `${m}:${rs.toString().padStart(2,'0')}`;
+        }
+
+        window.onload = () => {
+            loadWorkout();
+            setInterval(checkSensors, 2000);
+        };
+    </script>
+</body>
+</html>

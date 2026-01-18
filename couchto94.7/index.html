@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Couch to 94.7 | Leave the Couch. Enter the Race.</title>
+    <link rel="icon" href="assets/favicon.ico">
+    
+    <!-- PayPal SDK - Commented out temporarily -->
+    <!-- <script src="https://www.paypal.com/sdk/js?client-id=AWMjw-JB6E8nFkjToPpNNJkpPk9lxnp1I8IF13-djVLcOQ2daRj2k8tCM4jEHkjm_C8mPpnyO1Wj_rF4&currency=USD&components=buttons,hosted-fields&disable-funding=venmo,credit"></script> -->
+
+    <style>
+        :root {
+            --royal-blue: #003087;
+            --sky-blue: #00B4D8;
+            --light-gray: #F5F7FA;
+            --white: #FFFFFF;
+            --dark-gray: #2D3436;
+            --muted-text: #b3b3b3;
+            --dark-bg: #121212;
+            --light-text: #e0e0e0;
+            --card-bg: #1e1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            font-family: 'Impact', 'Arial Narrow', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            width: 100%;
+            background: #0f0f0f;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 3px solid var(--sky-blue);
+        }
+
+        nav a {
+            color: var(--muted-text);
+            text-decoration: none;
+            margin: 0 20px;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        nav a.unlocked {
+            color: var(--light-text);
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        nav a:hover { color: var(--sky-blue); }
+       
+        .logo {
+            width: 100px;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+        }
+
+        header {
+            position: relative;
+            text-align: center;
+            padding: 90px 15px 30px;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            font-size: 3.6rem;
+            text-transform: uppercase;
+            margin: 15px 0;
+            color: var(--white);
+            line-height: 1.05;
+        }
+
+        .highlight { color: var(--sky-blue); }
+
+        .hero-text {
+            font-size: 2rem;
+            margin: 15px 0 30px;
+            color: var(--white);
+        }
+
+        .cta-button {
+            background-color: var(--sky-blue);
+            color: white;
+            padding: 18px 50px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cta-button:hover { 
+            background: #00a0c0; 
+            transform: scale(1.04); 
+        }
+
+        .center-hero {
+            max-width: 92%;
+            margin: 25px auto 40px;
+            z-index: 2;
+        }
+
+        .center-hero img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+        }
+
+        main {
+            padding: 50px 15px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin: 50px 0;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0, 176, 216, 0.25);
+            border-left: 6px solid var(--sky-blue);
+        }
+
+        .feature-card h3 { 
+            margin-top: 0; 
+            font-size: 1.9rem; 
+            color: var(--sky-blue);
+        }
+
+        .feature-card p { color: var(--light-text); line-height: 1.4; }
+
+        .feature-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin-top: 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .free { border-left: 6px solid #00C851; }
+
+        .trailer-section {
+            margin: 70px 0;
+        }
+
+        audio {
+            width: 90%;
+            max-width: 480px;
+            margin: 20px 0;
+        }
+
+        .disclaimer {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            padding: 40px 15px;
+            text-align: center;
+        }
+
+        /* PAYWALL MODAL */
+        #paywall-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.96);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 30px 15px;
+        }
+
+        .paywall-content {
+            background: #111;
+            padding: 40px 25px;
+            border-radius: 20px;
+            border: 4px solid var(--sky-blue);
+            max-width: 580px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        }
+
+        .paywall-content h2 {
+            color: var(--sky-blue);
+            font-size: 2.4rem;
+            margin-bottom: 15px;
+        }
+
+        #paypal-button-container {
+            margin: 35px 0;
+            min-height: 60px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .logo { width: 80px; top: 12px; left: 12px; }
+
+            header { padding: 80px 15px 20px; }
+
+            h1 { font-size: 2.6rem; }
+            .hero-text { font-size: 1.6rem; }
+            .cta-button { padding: 14px 40px; font-size: 1.3rem; }
+
+            .center-hero { margin: 30px auto 50px; }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .feature-card { padding: 25px; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            .hero-text { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="assesment.html">
+    </nav>
+
+    <header>
+        <img src="assets/monogram.png" alt="Monogram Logo" class="logo">
+        <div class="hero-content">
+            <h1>Are You Ready to Leave the <span class="highlight">Couch?</span></h1>
+            <div class="hero-text">Begin Your Cycling Journey</div>
+            <button class="cta-button" id="assessment-btn">CONTINUE YOUR JOURNEY</button>
+        </div>
+
+        <div class="center-hero">
+            <img src="assets/94.7.png" alt="Couch to 94.7 Hero">
+        </div>
+    </header>
+
+    <main>
+        <section class="features">
+
+            <div class="feature-card">
+                <h3>Assessment</h3>
+                <p>Fitness Evaluation (FTP,Strength, Endurance, Power)</p>
+                <img src="assets/AF.png" alt="Assessment">
+            </div>
+
+            <div class="feature-card">
+                <h3>Dashboard</h3>
+                <p>Radar Screen Measure against Benchmarks</p>
+                <img src="assets/DF.png" alt="Dashboard">
+            </div>
+
+            <div class="feature-card">
+                <h3>Indoor Physical Training</h3>
+                <p>Training Programs: Build Phased Progression</p>
+                <p>Re-tests at end of each phase feed the radar screen</p>
+                <img src="assets/IP1.png" alt="Indoor Physical">
+            </div>
+            <div class="feature-card">
+                <h3>Injury Prevention</h3>
+                <p>Counter the repetitive stress of cycling with these targeted routines.</p>
+                <p>Re-tests at end of each phase feed the radar screen</p>
+                <img src="assets/IF.png" alt="Indoor Physical">
+            </div>
+
+            <div class="feature-card">
+                <h3>Indoor Cycle Training</h3>
+                <p>Power • Endurance • Speed • Recovery • FTP</p>
+                <img src="assets/IC.png" alt="Indoor Cycle">
+            </div>
+
+            <div class="feature-card">
+                <h3>94.7 Climbs (Routes)</h3>
+                <p>Routes • Ride the Routes. Own the Race.</p>
+                <img src="assets/CF.png" alt="94.7 Climbs">
+            </div>
+
+            <div class="feature-card">
+                <h3>Outdoor Training</h3>
+                <p>Routes • Ride the Routes. Own the Race.</p>
+                <img src="assets/OF.png" alt="Outdoor Training">
+            </div>
+
+            <div class="feature-card">
+                <h3>Mindset</h3>
+                <p>THE Cyclist Mindset: The Mental Cage</p>
+                <p>Master the Knowledge. Own the Race.</p>
+                <img src="assets/Mindset.png" alt="Mindset">
+            </div>
+
+            <div class="feature-card Free">
+                <h3>Sensors and Equipment</h3>
+                <p>Sensors Setup</p>
+                <h1 style="color:#00C851; margin:30px 0 10px; font-size:3rem;">FREE</h1>
+                <button class="cta-button" style="margin-top:15px;" 
+                        onclick="window.location.href='Sensor.html'">ACCESS NOW</button>
+            </div>
+
+            <div class="feature-card free">
+                <h3>Bike Fit</h3>
+                <p>Bike Fit Optimization Guide</p>
+                <h1 style="color:#00C851; margin:30px 0 10px; font-size:3rem;">FREE</h1>
+                <button class="cta-button" style="margin-top:15px;" 
+                        onclick="window.location.href='bike-fit.html'">ACCESS NOW</button>
+            </div>
+
+        </section>
+
+        <section class="trailer-section">
+            <h2 style="color: var(--sky-blue);">Get Hyped – Our Anthem</h2>
+            <audio controls>
+                <source src="assets/CouchSong.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <p>Feel the fire ignite before you even begin.</p>
+        </section>
+    </main>
+
+    <footer class="disclaimer">
+        Always consult a physician before starting any new fitness program.
+    </footer>
+
+    <!-- Paywall Modal (kept but PayPal inactive) -->
+    <div id="paywall-modal">
+        <div class="paywall-content">
+            <h2>Unlock Full Access – $279 Lifetime</h2>
+            <p>One-time payment • Everything unlocked forever • No subscriptions</p>
+            <div id="paypal-button-container">
+                <p style="color:#00C851; font-size:1.3rem; margin:40px 0;">
+                    Payment system temporarily disabled.<br>Coming soon!
+                </p>
+            </div>
+            <div class="paywall-footer">
+                <button onclick="document.getElementById('paywall-modal').style.display='none'" 
+                        style="padding:14px 50px; font-size:1.2rem;">
+                    BACK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // === DEVELOPMENT MODE: BYPASS PAYWALL COMPLETELY ===
+    // Remove or comment the lines below when you want real payments back
+
+    document.getElementById('assessment-btn').onclick = function() {
+        window.location.href = 'assessment.html';  // Always go straight to assessment
+    };
+
+    // Optional: Force "paid" status so other parts of site think you're unlocked
+    localStorage.setItem('couchTo947Paid', 'true');
+
+    // If you want to test the "Continue" text:
+    document.getElementById('assessment-btn').textContent = 'CONTINUE YOUR JOURNEY';
+</script>
+</body>
+</html>

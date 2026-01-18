@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>94.7 | Sensors & Equipment</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --royal-blue: #003087;
+            --sky-blue: #00B4D8;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --light-text: #f4f4f4;
+            --muted-text: #b3b3b3;
+            --success: #00C851;
+            --warning: #ffbb33;
+        }
+
+        body { background-color: var(--dark-bg); color: var(--light-text); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; }
+        nav { background: #111; padding: 15px 20px; text-align: center; border-bottom: 3px solid var(--sky-blue); position: sticky; top: 0; z-index: 100; }
+        nav a { color: var(--light-text); text-decoration: none; margin: 0 15px; text-size: 1rem; text-transform: uppercase; }
+        
+        header { text-align: center; padding: 30px 20px; background: linear-gradient(to bottom, var(--royal-blue), #001f5b); border-radius: 0 0 20px 20px; }
+        main { max-width: 900px; margin: 20px auto; }
+        
+        .card { background: var(--card-bg); border-radius: 12px; padding: 25px; margin-bottom: 25px; border-left: 6px solid var(--sky-blue); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        h2 { color: var(--sky-blue); text-transform: uppercase; margin-top: 0; font-size: 1.4rem; }
+        
+        .mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mode-tab { flex: 1; padding: 12px; text-align: center; background: #222; border: 2px solid #444; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .mode-tab.active { background: var(--sky-blue); border-color: var(--sky-blue); color: white; }
+        
+        .user-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        label { display: block; font-size: 0.8rem; color: var(--muted-text); margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; }
+        
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        button { flex: 1; min-width: 150px; background: var(--sky-blue); color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.calibrate { background: var(--warning); color: #000; }
+        
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
+        .metric-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 3px solid #444; }
+        .metric-value { display: block; font-size: 1.8rem; font-weight: bold; color: var(--sky-blue); }
+        .metric-label { font-size: 0.7rem; text-transform: uppercase; color: var(--muted-text); }
+        
+        #map { height: 250px; margin-top: 15px; border-radius: 8px; border: 1px solid #444; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+    
+    </nav>
+
+    <header>
+        <h1>Sensors & Equipment</h1>
+        <p>System Status: <span id="bt-status" style="color: var(--warning)">Disconnected</span></p>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2>1. Configuration</h2>
+            <div class="mode-tabs">
+                <div class="mode-tab active" id="tab-universal" onclick="switchMode('universal')">Classic Trainer</div>
+                <div class="mode-tab" id="tab-smart" onclick="switchMode('smart')">Wahoo Smart</div>
+            </div>
+
+            <div id="universal-inputs" class="user-inputs">
+                <div><label>Gender</label><select id="gender"><option value="1">Male</option><option value="0.9">Female</option></select></div>
+                <div><label>Weight (kg)</label><input type="number" id="weight" value="75"></div>
+            </div>
+
+            <div class="btn-group">
+    <button id="connect-bt">Pair Bluetooth Sensors</button>
+    <button id="calibrate-btn" class="calibrate" style="display: none;">Metrics Calibration</button>
+</div>
+        </div>
+
+        <div class="card">
+            <h2>2. Live Telemetry</h2>
+            <div class="metric-grid">
+                <div class="metric-box"><span class="metric-value" id="power">0</span><span class="metric-label">Watts</span></div>
+                <div class="metric-box"><span class="metric-value" id="speed">0.0</span><span class="metric-label">Speed km/h</span></div>
+                <div class="metric-box"><span class="metric-value" id="cadence">0</span><span class="metric-label">Cadence RPM</span></div>
+                <div class="metric-box"><span class="metric-value" id="hr">--</span><span class="metric-label">Heart Rate</span></div>
+                <div class="metric-box"><span class="metric-value" id="elevation">0</span><span class="metric-label">Elev Gain (m)</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>3. GPS Tracker (Outdoor Mode)</h2>
+            <button onclick="toggleGPS()" id="gps-btn" style="background: #444;">Start GPS Lock</button>
+            <div id="map"></div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, marker, watchId, ftmsControlChar;
+        let currentMode = 'universal';
+        let elevationGain = 0, lastAltitude = null;
+
+        // --- THE BRIDGE: BROADCAST TO TRAINING PAGE ---
+        function broadcast(power, cadence, hr) {
+            if (power !== undefined) localStorage.setItem('power', power);
+            if (cadence !== undefined) localStorage.setItem('cadence', cadence);
+            if (hr !== undefined) localStorage.setItem('heart-rate', hr);
+            localStorage.setItem('bt-status', 'Connected');
+            localStorage.setItem('last-update', Date.now());
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            document.getElementById('universal-inputs').style.display = mode === 'universal' ? 'grid' : 'none';
+            document.getElementById('calibrate-btn').style.display = mode === 'smart' ? 'block' : 'none';
+        // Add this after switchMode()
+document.getElementById('calibrate-btn').style.display = mode === 'universal' ? 'block' : 'none';
+
+// Calibration handler
+document.getElementById('calibrate-btn').addEventListener('click', () => {
+    alert("Metrics\n1. Classic Trainer: Uses Speedsenor and derives the rest\n2.Smart Trainer  : Uses Power and derives the rest ");
+    // Simple timer simulation (real spin-down needs speed sensor coast-down measurement)
+    setTimeout(() => {
+        alert("Calibration complete! Factor saved (default 1.0 for now).");
+        localStorage.setItem('calibFactor', '1.0'); // Placeholder – we can make real later
+    }, 30000); // 30 sec dummy
+});    
+        }
+        
+        document.getElementById('connect-bt').addEventListener('click', async () => {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [
+                        { services: ['fitness_machine'] }, 
+                        { services: ['heart_rate'] },
+                        { services: ['cycling_power'] }
+                    ],
+                    optionalServices: ['fitness_machine', 'heart_rate', 'cycling_power']
+                });
+
+                const server = await device.gatt.connect();
+                document.getElementById('bt-status').textContent = "Connected: " + device.name;
+                document.getElementById('bt-status').style.color = "var(--success)";
+
+                // HEART RATE SERVICE
+                try {
+                    const hrS = await server.getPrimaryService('heart_rate');
+                    const hrC = await hrS.getCharacteristic('heart_rate_measurement');
+                    hrC.addEventListener('characteristicvaluechanged', e => {
+                        const bpm = e.target.value.getUint8(1);
+                        document.getElementById('hr').textContent = bpm;
+                        broadcast(undefined, undefined, bpm);
+                    });
+                    await hrC.startNotifications();
+                } catch(e) { console.warn("No HR found"); }
+
+                // TRAINER SERVICE (FTMS)
+                if (currentMode === 'smart') {
+                    const fmS = await server.getPrimaryService('fitness_machine');
+                    const dataC = await fmS.getCharacteristic('indoor_bike_data');
+                    dataC.addEventListener('characteristicvaluechanged', handleTrainerData);
+                    await dataC.startNotifications();
+                    
+                    ftmsControlChar = await fmS.getCharacteristic('fitness_machine_control_point');
+                    await ftmsControlChar.startNotifications();
+                }
+            } catch (err) {
+                alert("Bluetooth Error: " + err.message);
+            }
+        });
+
+        function handleTrainerData(event) {
+            const data = event.target.value;
+            const flags = data.getUint16(0, true);
+            let offset = 2;
+            let currentP = 0, currentC = 0;
+
+            if (!(flags & 0x01)) { // Speed
+                const s = data.getUint16(offset, true) / 100.0;
+                document.getElementById('speed').textContent = s.toFixed(1);
+                offset += 2;
+            }
+            if (flags & 0x02) offset += 2; // Skip Avg Speed
+            if (flags & 0x04) { // Cadence
+                currentC = Math.round(data.getUint16(offset, true) * 0.5);
+                document.getElementById('cadence').textContent = currentC;
+                offset += 2;
+            }
+            if (flags & 0x08) offset += 3; // Total Distance
+            if (flags & 0x10) offset += 2; // Resistance
+            if (flags & 0x40) { // Power
+                currentP = data.getInt16(offset, true);
+                document.getElementById('power').textContent = currentP;
+            }
+            
+            // BROADCAST DATA TO OTHER TABS
+            broadcast(currentP, currentC, document.getElementById('hr').textContent);
+        }
+
+        // GPS LOGIC (FOR TOMORROW'S OUTDOOR TEST)
+        function toggleGPS() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                document.getElementById('gps-btn').textContent = "Start GPS Lock";
+                return;
+            }
+
+            if (!map) {
+                map = L.map('map').setView([-26.2041, 28.0473], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            }
+
+            watchId = navigator.geolocation.watchPosition(pos => {
+                const { latitude, longitude, altitude, speed } = pos.coords;
+                if (!marker) marker = L.marker([latitude, longitude]).addTo(map);
+                marker.setLatLng([latitude, longitude]);
+                map.panTo([latitude, longitude]);
+                
+                if(speed) document.getElementById('speed').textContent = (speed * 3.6).toFixed(1);
+
+                if (altitude !== null) {
+                    if (lastAltitude !== null && altitude > lastAltitude) {
+                        elevationGain += (altitude - lastAltitude);
+                        document.getElementById('elevation').textContent = Math.round(elevationGain);
+                    }
+                    lastAltitude = altitude;
+                }
+            }, null, { enableHighAccuracy: true });
+            document.getElementById('gps-btn').textContent = "Stop GPS Lock";
+        }
+
+        // Universal (Classic Trainer) Mode Power Estimation
+        setInterval(() => {
+            if (currentMode === 'universal') {
+                const s = parseFloat(document.getElementById('speed').textContent) || 0;
+                const w = parseFloat(document.getElementById('weight').value) || 75;
+                const g = parseFloat(document.getElementById('gender').value);
+                const p = Math.round(((s * s * s * 0.02) + (s * w * 0.05)) * g);
+                document.getElementById('power').textContent = p;
+                broadcast(p, document.getElementById('cadence').textContent, document.getElementById('hr').textContent);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

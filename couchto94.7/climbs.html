@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>94.7 | Climbs Oracle</title>
+    <style>
+        :root {
+            --royal-blue: #003087; --sky-blue: #00B4D8; --dark: #0f0f0f;
+            --card: #1a1a1a; --text: #f0f4f8; --muted: #a0b0c0;
+            --orange: #ff9500; --red: #ff4d4d; --green: #2ecc71;
+        }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { background: var(--dark); color: var(--text); font-family: system-ui, sans-serif; }
+
+        /* --- Engine Status Top Bar --- */
+        .engine-status-bar {
+            background: #000;
+            padding: 0.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 2px solid #333;
+        }
+        .engine-btn {
+            background: rgba(0, 180, 216, 0.1);
+            color: var(--sky-blue);
+            border: 1px solid var(--sky-blue);
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
+
+        nav { background: #000; padding: 1rem; display: flex; justify-content: center; gap: 1.5rem; border-bottom: 3px solid var(--sky-blue); }
+        nav a { color: var(--muted); text-decoration: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        nav a.active { color: var(--sky-blue); }
+
+        main { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
+
+        /* Profile & Heat Map */
+        .profile-container {
+            background: var(--card); border-radius: 16px; padding: 1.5rem;
+            border: 1px solid #333; margin-bottom: 1.5rem; position: relative;
+        }
+        #elevation-svg { width: 100%; height: 180px; background: #000; border-radius: 8px; margin-top: 10px; }
+
+        /* Metrics Table matched to Spreadsheet */
+        .metrics-card { background: var(--card); border-radius: 16px; padding: 1rem; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--sky-blue); font-size: 0.7rem; text-transform: uppercase; padding: 12px; border-bottom: 1px solid #333; }
+        td { padding: 15px 12px; border-bottom: 1px solid #222; font-size: 1rem; }
+        .label-cell { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        .sensor-data { color: var(--orange); font-weight: 800; text-align: right; font-family: monospace; font-size: 1.3rem; }
+
+        .btn-climb { 
+            width: 100%; padding: 1.5rem; border-radius: 12px; border: none; 
+            font-size: 1.2rem; font-weight: 900; text-transform: uppercase; 
+            cursor: pointer; margin-top: 1.5rem; background: var(--success); color: #fff;
+        }
+        .btn-active { background: var(--red) !important; }
+    </style>
+</head>
+<body>
+
+<div class="engine-status-bar">
+    <div class="engine-btn">
+        <div class="dot"></div> ENGINE ACTIVE: SENSORS STREAMING
+    </div>
+</div>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="physical.html">Physical</a>
+    <a href="Sensor.html">Sensors</a>
+    <a href="indoor.html">Indoor</a>
+    <a href="climbs.html">Climbs</a>
+    <a href="outdoor.html" class="active">Outdoor</a>
+    <a href="injury.html">Injury</a>
+    <a href="mindset.html">Mindset</a>
+</nav>
+
+<main>
+    <section style="margin-bottom: 1.5rem;">
+        <select id="climbSelect" style="width:100%; padding:1rem; background:var(--card); color:#fff; border:2px solid var(--sky-blue); border-radius:10px; font-weight:bold;" onchange="updateClimb()">
+            <option value="joeys">CLIMB: JOEYS</option>
+            <option value="summit">CLIMB: SUMMIT</option>
+            <option value="cedar">CLIMB: CEDAR ROAD</option>
+        </select>
+    </section>
+
+    <section class="profile-container">
+        <div style="display:flex; justify-content: space-between; align-items:center;">
+            <h2 id="displayTitle" style="color:var(--sky-blue); font-size:1.1rem;">JOEYS</h2>
+            <span id="gradTag" style="color:var(--red); font-weight:900;">7.2% AVG GRADE</span>
+        </div>
+        
+        <svg id="elevation-svg" viewBox="0 0 400 150" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:var(--green);" />
+                    <stop offset="30%" style="stop-color:var(--orange);" />
+                    <stop offset="60%" style="stop-color:var(--red);" />
+                    <stop offset="100%" style="stop-color:var(--red);" />
+                </linearGradient>
+            </defs>
+            <path id="climbPath" d="M0,130 L100,110 L200,60 L300,45 L400,30 L400,150 L0,150 Z" fill="url(#heatGradient)" />
+            <line id="riderPosition" x1="10" y1="0" x2="10" y2="150" stroke="#fff" stroke-width="4" />
+        </svg>
+    </section>
+
+    <section class="metrics-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>METRIC</th>
+                    <th style="text-align:right;">SENSOR RESULT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="label-cell">Power (NP)</td><td class="sensor-data" id="pwr-live">0 w</td></tr>
+                <tr><td class="label-cell">Cadence</td><td class="sensor-data" id="cad-live">0 rpm</td></tr>
+                <tr><td class="label-cell">Speed</td><td class="sensor-data" id="spd-live">0.0 km/h</td></tr>
+                <tr><td class="label-cell">Distance</td><td class="sensor-data" id="dist-live">0.00 km</td></tr>
+                <tr><td class="label-cell">Elevation</td><td class="sensor-data">--</td></tr>
+                <tr><td class="label-cell">Time</td><td class="sensor-data">00:00</td></tr>
+                <tr><td class="label-cell">TSS</td><td class="sensor-data" id="tss-val">0</td></tr>
+                <tr><td class="label-cell">IF</td><td class="sensor-data" id="if-val">0.00</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <button id="startBtn" class="btn-climb" onclick="toggleClimb()">Start Climb Session</button>
+</main>
+
+<script>
+    const data = {
+        joeys: { name: "JOEYS", grad: "7.2% AVG", path: "M0,130 L100,110 L200,60 L300,45 L400,30 L400,150 L0,150 Z" },
+        summit: { name: "SUMMIT", grad: "5.5% AVG", path: "M0,140 L120,120 L240,80 L400,50 L400,150 L0,150 Z" },
+        cedar: { name: "CEDAR ROAD", grad: "4.8% AVG", path: "M0,120 L150,110 L300,95 L400,80 L400,150 L0,150 Z" }
+    };
+
+    let active = false;
+
+    function updateClimb() {
+        const val = document.getElementById('climbSelect').value;
+        document.getElementById('displayTitle').innerText = data[val].name;
+        document.getElementById('gradTag').innerText = data[val].grad;
+        document.getElementById('climbPath').setAttribute('d', data[val].path);
+        document.getElementById('riderPosition').setAttribute('x1', 10);
+        document.getElementById('riderPosition').setAttribute('x2', 10);
+    }
+
+    function toggleClimb() {
+        active = !active;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = active ? "Stop & Save" : "Start Climb Session";
+        btn.classList.toggle('btn-active', active);
+    }
+</script>
+</body>
+</html>

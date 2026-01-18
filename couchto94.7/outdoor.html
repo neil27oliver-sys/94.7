@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>94.7 | Outdoor Lab</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --royal-blue: #003087;
+            --sky-blue: #00B4D8;
+            --dark: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #f0f4f8;
+            --muted: #a0b0c0;
+            --orange: #ff9500;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
+
+        * { box-sizing: border-box; margin:0; padding:0; }
+        
+        body { 
+            background: var(--dark); 
+            color: var(--text); 
+            font-family: system-ui, sans-serif; 
+            line-height: 1.5; 
+        }
+
+        /* --- Navigation --- */
+        nav {
+            background: #000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            border-bottom: 3px solid var(--sky-blue);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.8px;
+        }
+
+        nav a.active, nav a:hover { color: var(--sky-blue); }
+
+        /* --- Main Layout --- */
+        main { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
+
+        /* --- TOP HUD --- */
+        .glance-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hud-box {
+            background: var(--card);
+            padding: 1.5rem 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border-bottom: 4px solid var(--sky-blue);
+        }
+
+        .hud-box label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 0.5rem;}
+        .hud-box .value { font-size: 3.5rem; font-weight: 800; color: #fff; line-height: 1; display: inline-block;}
+        .hud-box .unit { font-size: 1rem; color: var(--sky-blue); font-weight: 600; margin-left: 5px;}
+
+        /* --- VISUALS --- */
+        .visual-section {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        #map { height: 350px; width: 100%; background: #eee; }
+
+        .elevation-hud {
+            padding: 1rem;
+            border-top: 1px solid #333;
+            position: relative;
+        }
+
+        #elevation-canvas {
+            width: 100%;
+            height: 100px;
+            background: #0a0a0a;
+            display: block;
+        }
+
+        .grad-overlay {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: var(--orange);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        /* --- METRICS TABLE (RESTORED SENSOR COLUMN) --- */
+        .metrics-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #333;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--sky-blue); font-size: 0.65rem; text-transform: uppercase; padding: 10px; border-bottom: 1px solid #333;}
+        td { padding: 12px 10px; border-bottom: 1px solid #222; font-size: 0.85rem;}
+
+        .label-cell { color: var(--muted); font-weight: 600; width: 25%; }
+        .data-cell { color: #fff; font-family: monospace; text-align: right; }
+        .sensor-cell { color: var(--orange); font-weight: 700; text-align: right; }
+        .calib-cell { color: var(--sky-blue); font-size: 0.8rem; text-align: right; }
+
+        /* --- CONTROLS --- */
+        .controls { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn {
+            flex: 1;
+            padding: 1.2rem;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .btn-start { background: var(--success); color: #fff; }
+        .btn-stop { background: var(--danger); color: #fff; }
+
+        @media (max-width: 600px) {
+            .hud-box .value { font-size: 2.5rem; }
+            td, th { padding: 8px 5px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="physical.html">Physical</a>
+    <a href="Sensor.html">Sensors</a>
+    <a href="indoor.html">Indoor</a>
+    <a href="climbs.html">Climbs</a>
+    <a href="outdoor.html" class="active">Outdoor</a>
+    <a href="injury.html">Injury</a>
+    <a href="mindset.html">Mindset</a>
+</nav>
+
+<main>
+    <section class="glance-container">
+        <div class="hud-box">
+            <label>Current Speed</label>
+            <span id="speed" class="value">0.0</span><span class="unit">km/h</span>
+        </div>
+        <div class="hud-box" style="border-color: var(--orange);">
+            <label>Heart Rate</label>
+            <span id="hr" class="value">--</span><span class="unit">bpm</span>
+        </div>
+    </section>
+
+    <section class="visual-section">
+        <div id="map"></div>
+        <div class="elevation-hud">
+            <label style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase;">Real-Time Elevation</label>
+            <div class="grad-overlay" id="gradient">0.0%</div>
+            <canvas id="elevation-canvas"></canvas>
+        </div>
+    </section>
+
+    <section class="metrics-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th style="text-align: right;">GPS Avg</th>
+                    <th style="text-align: right;">Sensor</th>
+                    <th style="text-align: right;">Calib</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="label-cell">Distance</td>
+                    <td class="data-cell" id="total-dist">0.0 km</td>
+                    <td class="sensor-cell">--</td>
+                    <td class="calib-cell">--</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Speed</td>
+                    <td class="data-cell" id="gps-speed-avg">0.0</td>
+                    <td class="sensor-cell" id="sensor-speed">0.0</td>
+                    <td class="calib-cell">Offset: 0%</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Power (NP)</td>
+                    <td class="data-cell">--</td>
+                    <td class="sensor-cell" id="sensor-power">0 w</td>
+                    <td class="calib-cell">Recalibrate</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Cadence</td>
+                    <td class="data-cell">--</td>
+                    <td class="sensor-cell" id="sensor-cadence">0 rpm</td>
+                    <td class="calib-cell">Syncing</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <div class="controls">
+        <button class="btn btn-start" onclick="startRide()">Start Ride</button>
+        <button class="btn btn-stop" onclick="stopRide()">Finish & Save</button>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, riderTrack, marker;
+    let isTracking = false;
+    let path = [];
+    let elevationHistory = [];
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false, attributionControl: false }).setView([-25.98, 28.12], 14); 
+        
+        // VOYAGER TILESET
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+
+        // BLACK LINE for White Background
+        riderTrack = L.polyline([], { color: '#000000', weight: 6, opacity: 1.0 }).addTo(map);
+
+        marker = L.circleMarker([0,0], { radius: 7, color: '#00B4D8', fillColor: '#00B4D8', fillOpacity: 1 }).addTo(map);
+    }
+
+    function startRide() {
+        if (!navigator.geolocation) return alert("GPS Error");
+        isTracking = true;
+        navigator.geolocation.watchPosition(handleSuccess, null, { enableHighAccuracy: true });
+    }
+
+    function handleSuccess(pos) {
+        if(!isTracking) return;
+        const { latitude, longitude, speed, altitude } = pos.coords;
+        const currentPos = [latitude, longitude];
+        const kmh = (speed * 3.6) || 0;
+
+        document.getElementById('speed').innerText = kmh.toFixed(1);
+        document.getElementById('gps-speed-avg').innerText = kmh.toFixed(1);
+        
+        path.push(currentPos);
+        riderTrack.setLatLngs(path);
+        marker.setLatLng(currentPos);
+        map.panTo(currentPos);
+
+        if(altitude) updateElevation(altitude);
+    }
+
+    function updateElevation(alt) {
+        elevationHistory.push(alt);
+        if(elevationHistory.length > 60) elevationHistory.shift();
+        const canvas = document.getElementById('elevation-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.beginPath();
+        ctx.strokeStyle = '#00B4D8';
+        ctx.lineWidth = 3;
+        const slice = canvas.width / 60;
+        elevationHistory.forEach((val, i) => {
+            const x = i * slice;
+            const y = canvas.height - ((val % 100) / 100 * canvas.height); 
+            if(i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    function stopRide() { isTracking = false; alert("Ride Data Saved."); }
+    window.onload = initMap;
+</script>
+</body>
+</html>
