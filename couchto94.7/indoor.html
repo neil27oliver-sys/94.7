@@ -3,380 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Command Center | Couch to 94.7</title>
-    <link rel="icon" href="assets/favicon.ico">
+    <title>Indoor Training | Couch to 94.7</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
     <style>
         :root {
+            --royal-blue: #003087;
             --sky-blue: #00B4D8;
-            --light-blue: #81d4fa;
-            --dark-blue: #01579b;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #e0e0e0;
-            --success: #00C851;
-            --warning: #FF4136;
+            --dark: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #f0f4f8;
+            --muted: #a0b0c0;
+            --orange: #ff9500;
+            --red: #ff4d4d;
+            --green: #2ecc71;
+            --dark-blue-hard: #00008b;
         }
-         nav {
-            width: 100%;
-            background: #0f0f0f;
-            padding: 15px 0;
-            text-align: center;
-            border-bottom: 3px solid var(--sky-blue);
-        }
+        body { background: var(--dark); color: var(--text); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
 
-        nav a {
-            color: var(--muted-text);
-            text-decoration: none;
-            margin: 0 18px;
-            text-transform: uppercase;
-            font-size: 1rem;
-            transition: color 0.3s;
-        }
+        nav { background: #000; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--sky-blue); }
+        .nav-links a { color: var(--muted); text-decoration: none; margin: 0 15px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; }
+        .nav-links a.active, .nav-links a:hover { color: var(--sky-blue); }
 
-        nav a:hover, nav a.active { color: var(--sky-blue); }
+        .spotify-btn { background: #1DB954; color: #000; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
 
-        header {
-            text-align: center;
-            padding: 60px 20px 30px;
-            background: linear-gradient(to bottom, rgba(0,180,216,0.12), transparent);
-        }
-        body {
-            background-color: var(--dark-bg);
-            color: var(--text);
-            font-family: 'Impact', sans-serif;
-            margin: 0; padding: 20px;
-        }
+        .status-header { background: #000; padding: 10px 20px; font-size: 0.9rem; color: var(--muted); border-bottom: 1px solid #333; text-align: center; }
+        .engine-active { color: var(--green); font-weight: bold; }
+        .connected-sensors { color: var(--sky-blue); font-weight: bold; }
 
-        body {
-            background-color: var(--dark-bg);
-            color: var(--text);
-            font-family: 'Impact', sans-serif;
-            margin: 0; padding: 20px;
-        }
+        .sensor-config { background: var(--card); border-radius: 16px; padding: 25px; margin: 20px; border-left: 6px solid var(--sky-blue); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mode-tab { flex: 1; padding: 12px; text-align: center; background: #222; border: 2px solid #444; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .mode-tab.active { background: var(--sky-blue); border-color: var(--sky-blue); color: white; }
 
-        /* Top Status Bar */
-        .status-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #000;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            margin-bottom: 20px;
-        }
+        .user-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .btn-pair { width: 100%; background: var(--sky-blue); color: white; border: none; padding: 15px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
 
-        #sync-indicator {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            background: var(--warning);
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; background: var(--card); border-radius: 15px; margin: 20px; }
+        .input-box label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: #222; border: 1px solid #333; color: white; font-size: 1.2rem; font-weight: bold; text-align: center; border-radius: 6px; }
 
-        .sync-active { background: var(--success) !important; box-shadow: 0 0 10px var(--success); }
-
-        .controls {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid var(--sky-blue);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        select, input {
-            background: #222;
-            border: 2px solid var(--sky-blue);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .btn-main {
-            background: var(--sky-blue);
-            color: black;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            margin: 15px 0;
-        }
-
-        .action-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            font-size: 2rem;
-            background: var(--sky-blue);
-            color: black;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-            box-shadow: 0 0 10px rgba(0,180,216,0.5);
-        }
-
-        .action-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px var(--sky-blue);
-        }
-
-        .chart-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-bottom: 5px solid var(--sky-blue);
-        }
-
+        .chart-card { background: var(--card); border-radius: 16px; padding: 20px; margin: 20px; border-bottom: 5px solid var(--sky-blue); }
         .chart-container { height: 350px; position: relative; }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px; }
+        .stat-box { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--sky-blue); }
+        .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 2.2rem; font-weight: bold; color: var(--sky-blue); }
 
-        .stat-box {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #333;
-        }
+        .btn-start { width: calc(100% - 40px); margin: 0 20px 20px 20px; padding: 18px; background: var(--sky-blue); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1.4rem; cursor: pointer; }
+        .btn-running { background: var(--red) !important; color: white !important; }
 
-        .stat-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
-        .stat-value { font-size: 2rem; font-weight: bold; color: var(--sky-blue); }
-
-        #coach-msg {
-            text-align: center;
-            font-size: 1.8rem;
-            margin: 15px 0;
-            color: var(--sky-blue);
-            text-shadow: 2px 2px #000;
-        }
-       
+        .footer-note { text-align: center; padding: 20px; color: var(--muted); font-size: 0.9rem; font-style: italic; }
     </style>
-   <nav>
-    <a href="index.html">Home</a>
-    <a href="assesment.html">Assessment</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="physical.html">Physical</a>
-    <a href="Sensor.html">Sensors</a>
-    <a href="indoor.html">Indoor</a>
-    <a href="climbs.html">Climbs</a>
-    <a href="outdoor.html" class="active">Outdoor</a>
-    <a href="injury.html">Injury</a>
-    <a href="mindset.html">Mindset</a>
-</nav>
 </head>
 <body>
-    <header>
-        <h1 id="workout-title">Indoor Training</h1>
-        <p id="workout-desc">Select a profile to begin your session</p>
-    </header>
-    <div class="status-header">
-        <div style="font-size: 1.2rem;">COUCH TO 94.7 | <span id="workout-name">Select Profile</span></div>
-        <button id="sync-indicator" onclick="checkSensors()">SYNC SENSORS: OFFLINE</button>
+
+<nav>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="assessment.html">Assessment</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="physical.html">Physical</a>
+        <a href="sensors.html">Sensors</a>
+        <a href="indoor.html" class="active">Indoor</a>
+    </div>
+    <a href="https://open.spotify.com" target="_blank" class="spotify-btn">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="20" alt="Spotify">
+        SPOTIFY MUSIC
+    </a>
+</nav>
+
+<div class="status-header">
+    ENGINE STATUS: <span id="engine-status">OFFLINE</span> | 
+    SENSORS ONLINE: <span id="online-sensors">None</span>
+</div>
+
+<main>
+    <div class="sensor-config">
+        <h2>1. CONFIGURATION</h2>
+        <div class="mode-tabs">
+            <div class="mode-tab active" id="tab-universal" onclick="switchMode('universal')">Classic Trainer</div>
+            <div class="mode-tab" id="tab-smart" onclick="switchMode('smart')">Wahoo Smart</div>
+        </div>
+
+        <div id="universal-inputs" class="user-inputs">
+            <div><label>Gender</label><select id="gender"><option value="1">Male</option><option value="0.9">Female</option></select></div>
+            <div><label>Weight (kg)</label><input type="number" id="weight" value="75"></div>
+        </div>
+
+        <button class="btn-pair" onclick="pairSensors()">Pair Bluetooth Sensors</button>
     </div>
 
     <div class="controls">
-        <select id="workout-select" onchange="loadWorkout()">
-            <option value="endurance">Endurance Base</option>
-            <option value="climb">Climbing Power</option>
-            <option value="speed">Speed Intervals</option>
-            <option value="attack">Attack Simulation</option>
-            <option value="ftptest">Standard FTP Test</option>
-        </select>
-        
-        <div>
-            <label>Initial FTP:</label>
-            <input type="number" id="initial-ftp" value="150" style="width: 70px;">
+        <div class="input-box">
+            <label>Workout Profile</label>
+            <select id="workout-type" onchange="loadProfile()">
+                <option value="sensor-test">SENSOR TEST</option>
+                <option value="warmup-cooldown">Warmup/Cooldown</option>
+                <option value="endurance">Endurance Base</option>
+                <option value="climb">Climbing Power</option>
+                <option value="speed">Speed Intervals</option>
+                <option value="attack">Attack Simulation</option>
+                <option value="ftptest">FTP Test</option>
+            </select>
         </div>
-        <div>
-            <label>Latest FTP:</label>
-            <input type="number" id="latest-ftp" value="150" style="width: 70px;" onchange="loadWorkout()">
-        </div>
-
-        
-
-        <button class="btn-main" onclick="startWorkout()">Start Ride</button>
-        <button class="btn-main" style="background:#444; color:white;" onclick="resetRide()">New Ride</button>
+        <div class="input-box"><label>Initial FTP</label><input type="number" id="initial-ftp" value="150" oninput="loadProfile()"></div>
+        <div class="latest-ftp-box input-box"><label>Latest FTP</label><input type="number" id="latest-ftp" value="150" oninput="loadProfile()"></div>
     </div>
 
-    <div id="coach-msg">READY TO RIDE</div>
-
-    <div class="chart-card">
-        <div class="chart-container">
-            <canvas id="workoutChart"></canvas>
-        </div>
-    </div>
+    <section class="chart-card">
+        <div class="chart-container"><canvas id="profileChart"></canvas></div>
+        <div style="text-align:center; margin-top:10px; color:white; font-weight:bold;">Duration: <span id="total-time">30:00</span></div>
+    </section>
 
     <div class="stats-grid">
-        <div class="stat-box"><div class="stat-label">Power Tgt/Live</div><div class="stat-value"><span id="t-watts">0</span>/<span id="l-watts">0</span></div></div>
-        <div class="stat-box"><div class="stat-label">Cad Live</div><div class="stat-value" id="l-cad">0</div></div>
-        <div class="stat-box"><div class="stat-label">Speed km/h</div><div class="stat-value" id="l-speed">0.0</div></div>
-        <div class="stat-box"><div class="stat-label">Distance km</div><div class="stat-value" id="l-dist">0.00</div></div>
-        <div class="stat-box"><div class="stat-label">Time Remaining</div><div class="stat-value" id="time-rem">00:00</div></div>
+        <div class="stat-box"><div class="stat-label">Power Tgt/Live</div><div class="stat-value"><span id="t-power">0</span>/<span id="l-power">0</span></div></div>
+        <div class="stat-box"><div class="stat-label">Cad Live</div><div class="stat-value" id="live-cadence">0</div></div>
+        <div class="stat-box"><div class="stat-label">Speed km/h</div><div class="stat-value" id="live-speed">0.0</div></div>
+        <div class="stat-box"><div class="stat-label">Heart Rate</div><div class="stat-value" id="live-hr">0</div></div>
+        <div class="stat-box"><div class="stat-label">Distance km</div><div class="stat-value" id="live-distance">0.00</div></div>
+        <div class="stat-box"><div class="stat-label">Time Remaining</div><div class="stat-value" id="time-left">00:00</div></div>
     </div>
 
-    <script>
-        let workoutChart;
-        let workoutData = [], cadenceTargets = [], performanceData = [], blockColors = [];
-        let currentTime = 0, totalDist = 0, activeInterval = null;
-        
+    <button id="startBtn" class="btn-start" onclick="toggleSession()">START SESSION</button>
 
-        const PROFILES = {
-            endurance: [ {m:10, p:0.6, c:90}, {m:2, p:1.0, c:100}, {m:5, p:0.5, c:80}, {m:10, p:0.75, c:90}, {m:3, p:0.6, c:90} ],
-            climb: [ {m:10, p:0.6, c:85}, {m:3, p:1.2, c:100}, {m:5, p:0.5, c:80}, {m:5, p:1.2, c:90}, {m:7, p:0.6, c:85} ],
-            speed: [ {m:10, p:0.6, c:90}, {m:2, p:1.4, c:120}, {m:5, p:0.5, c:80}, {m:3, p:1.4, c:120}, {m:10, p:0.6, c:90} ],
-            attack: [ {m:10, p:0.5, c:90}, {m:5, p:1.3, c:120}, {m:5, p:0.5, c:80}, {m:7, p:1.2, c:120}, {m:3, p:0.6, c:90} ],
-            ftptest: [ {m:10, p:0.6, c:90}, {m:20, p:1.0, c:0}, {m:10, p:0.6, c:80} ] // FTP profile: 10 min warmup, 20 min hard (no targets), 10 min cooldown
-        };
+    <div class="footer-note">Warmup/cooldown time is flexible and determined by user suggest 10 min</div>
+</main>
 
-        function loadWorkout() {
-            const type = document.getElementById('workout-select').value;
-            const latest = parseInt(document.getElementById('latest-ftp').value) || 150;
-            const initial = parseInt(document.getElementById('initial-ftp').value) || 150;
-            
-            workoutData = []; cadenceTargets = []; performanceData = []; blockColors = [];
-            
-            PROFILES[type].forEach((b) => {
-                const totalSeconds = Math.round(b.m * 60);
-                const color = b.p >= 1.0 ? 'rgba(1, 87, 155, 0.7)' : 'rgba(129, 212, 250, 0.7)';
-                for (let s = 0; s < totalSeconds; s++) {
-                    workoutData.push(Math.round(latest * b.p));
-                    cadenceTargets.push(b.c);
-                    performanceData.push(null);
-                    blockColors.push(color);
-                }
-            });
-            
-            document.getElementById('workout-name').innerText = type.toUpperCase().replace('ftptest', 'FTP TEST');
-            currentTime = 0; totalDist = 0;
-            renderChart();
+<script>
+    let chart = null;
+    let isRunning = false;
+    let secondsElapsed = 0;
+    let totalSeconds = 1800; // 30 min default
+    let powerHistory = [];
+    let liveP = 0, liveC = 0, liveS = 0, liveH = 0;
+    let sensorsFound = [];
+
+    const PROFILES = {
+        'sensor-test': [], // No profile, just live metrics (30 sec warmup + 30 sec cooldown)
+        'warmup-cooldown': [{m: 10, p: 0.55, c: 85}],
+        endurance: [{m: 10, p: 0.6, c: 90}, {m: 10, p: 0.8, c: 90}, {m: 10, p: 0.6, c: 90}],
+        climb: [{m: 10, p: 0.6, c: 85}, {m: 10, p: 1.1, c: 90}, {m: 10, p: 0.7, c: 85}],
+        speed: [{m: 5, p: 0.6, c: 90}, {m: 2, p: 1.5, c: 120}, {m: 3, p: 0.6, c: 90}, {m: 2, p: 1.5, c: 120}, {m: 18, p: 0.7, c: 90}],
+        attack: [{m: 5, p: 0.5, c: 90}, {m: 5, p: 1.3, c: 120}, {m: 20, p: 0.8, c: 90}],
+        ftptest: [{m: 10, p: 0.6, c: 90}, {m: 20, p: 1.0, c: 0}, {m: 10, p: 0.6, c: 80}]
+    };
+
+    function loadProfile() {
+        const type = document.getElementById('workout-type').value || 'endurance';
+        const latestFTP = parseInt(document.getElementById('latest-ftp').value) || 150;
+
+        // Fixed times for special profiles
+        let totalMins = 30;
+        if (type === 'ftptest') totalMins = 40;
+        if (type === 'warmup-cooldown') totalMins = 10;
+        if (type === 'sensor-test') totalMins = 1; // 30 sec + 30 sec
+
+        // Scaling for other profiles: 30 min min, 60 min max only at FTP = 240
+        if (type !== 'ftptest' && type !== 'warmup-cooldown' && type !== 'sensor-test') {
+            if (latestFTP >= 240) totalMins = 60;
+            else if (latestFTP > 150) totalMins = 30 + Math.round((latestFTP - 150) / (240 - 150) * 30);
         }
 
-        function renderChart() {
-            const ctx = document.getElementById('workoutChart').getContext('2d');
-            if (workoutChart) workoutChart.destroy();
-            
-            const labels = workoutData.map((_, i) => (i % 60 === 0) ? Math.floor(i/60) : "");
+        totalSeconds = totalMins * 60;
 
-            workoutChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { 
-                            label: 'Target', data: workoutData, stepped: true, fill: true, 
-                            pointRadius: 0, borderWidth: 0, 
-                            segment: { backgroundColor: c => blockColors[c.p0DataIndex] } 
-                        },
-                        { 
-                            label: 'Rider', data: performanceData, borderColor: '#FFFFFF', 
-                            borderWidth: 8, pointRadius: 0, spanGaps: false 
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { 
-                        x: { grid: { display: false }, ticks: { color: '#888' }, title: { display: true, text: 'MINUTES', color: '#555' } },
-                        y: { beginAtZero: true, grid: { color: '#333' } } 
+        document.getElementById('total-time').innerText = totalMins + ":00";
+        document.getElementById('time-left').innerText = formatTime(totalSeconds);
+
+        const profile = PROFILES[type] || [];
+        targetData = [];
+        riderData = new Array(totalSeconds).fill(null);
+
+        profile.forEach(b => {
+            for (let i = 0; i < (b.m * 60); i++) targetData.push(Math.round(latestFTP * b.p));
+        });
+
+        renderChart();
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('profileChart').getContext('2d');
+        if (chart) chart.destroy();
+
+        const labels = targetData.map((_, i) => (i % 60 === 0) ? Math.floor(i/60) : "");
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Target Power',
+                        data: targetData,
+                        stepped: true,
+                        fill: true,
+                        pointRadius: 0,
+                        borderWidth: 0,
+                        backgroundColor: ctx => targetData[ctx.p0DataIndex] <= targetData[targetData.length-1] * 0.7 ? 'rgba(0,180,216,0.5)' : 'rgba(0,0,139,0.5)'
                     },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function checkSensors() {
-            const p = localStorage.getItem('power');
-            const indicator = document.getElementById('sync-indicator');
-            if (p !== null) {
-                indicator.innerText = "SENSORS: PAIRED & ACTIVE";
-                indicator.classList.add('sync-active');
-            } else {
-                indicator.innerText = "SENSORS: OFFLINE";
-                indicator.classList.remove('sync-active');
+                    {
+                        label: 'Rider Power',
+                        data: riderData,
+                        borderColor: '#FFFFFF',
+                        borderWidth: 3, // Thinner line
+                        pointRadius: 0,
+                        spanGaps: true,
+                        tension: 0.1 // Slight smoothing/curve
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#888' } },
+                    y: { beginAtZero: true, grid: { color: '#333' } }
+                },
+                plugins: { legend: { display: false } },
+                animation: { duration: 0 }
             }
+        });
+    }
+
+    function toggleSession() {
+        isRunning = !isRunning;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = isRunning ? "STOP SESSION" : "START SESSION";
+        btn.classList.toggle('btn-running', isRunning);
+        if (!isRunning) { secondsElapsed = 0; powerHistory = []; loadProfile(); }
+    }
+
+    // Bluetooth Sensor Integration (fixed parsing)
+    let device, server;
+    let connectedSensors = [];
+
+    async function pairSensors() {
+        try {
+            device = await navigator.bluetooth.requestDevice({
+                filters: [
+                    { services: ['cycling_power'] },
+                    { services: ['heart_rate'] },
+                    { services: ['fitness_machine'] }
+                ],
+                optionalServices: ['cycling_power', 'heart_rate', 'fitness_machine']
+            });
+
+            server = await device.gatt.connect();
+            document.getElementById('engine-status').innerText = "CONNECTED";
+            document.getElementById('engine-status').className = "engine-active";
+
+            if (!sensorsFound.includes(device.name)) sensorsFound.push(device.name);
+            document.getElementById('online-sensors').innerText = sensorsFound.join(' | ');
+
+            // FTMS / Indoor Bike Data
+            try {
+                const fmS = await server.getPrimaryService('fitness_machine');
+                const dataC = await fmS.getCharacteristic('indoor_bike_data');
+                dataC.addEventListener('characteristicvaluechanged', (e) => {
+                    let v = e.target.value;
+                    let offset = 0;
+                    const flags = v.getUint16(offset, true);
+                    offset += 2;
+
+                    // Speed
+                    if (!(flags & 0x01)) {
+                        liveS = v.getUint16(offset, true) / 100.0;
+                        offset += 2;
+                    }
+                    // Cadence
+                    if (flags & 0x04) {
+                        liveC = v.getUint16(offset, true) / 2;
+                        offset += 2;
+                    }
+                    // Power
+                    if (flags & 0x40) {
+                        liveP = v.getInt16(offset, true);
+                        offset += 2;
+                    }
+                });
+                await dataC.startNotifications();
+            } catch (e) { console.log("No FTMS service"); }
+
+            // Heart Rate
+            try {
+                const hService = await server.getPrimaryService('heart_rate');
+                const hChar = await hService.getCharacteristic('heart_rate_measurement');
+                hChar.addEventListener('characteristicvaluechanged', (e) => {
+                    let v = e.target.value;
+                    let offset = 1;
+                    liveH = v.getUint8(offset);
+                });
+                await hChar.startNotifications();
+            } catch (e) { console.log("No HR service"); }
+
+        } catch (err) {
+            console.log(err);
+            alert("Bluetooth pairing failed. Make sure Bluetooth is on and try again.");
         }
+    }
 
-        function startWorkout() {
-            if (activeInterval) clearInterval(activeInterval);
-            activeInterval = setInterval(updateRide, 1000);
-            checkSensors();
-        }
+    // Live update interval
+    setInterval(() => {
+        document.getElementById('l-power').innerText = liveP;
+        document.getElementById('live-cadence').innerText = liveC;
+        document.getElementById('live-speed').innerText = liveS.toFixed(1);
+        document.getElementById('live-hr').innerText = liveH;
 
-        function updateRide() {
-            if (currentTime >= workoutData.length) return resetRide();
+        if (!isRunning) return;
+        secondsElapsed++;
+        if (secondsElapsed >= totalSeconds) { toggleSession(); return; }
 
-            let liveW = parseInt(localStorage.getItem('power'));
-            let liveC = parseInt(localStorage.getItem('cadence'));
-            
-            if (isNaN(liveW)) liveW = workoutData[currentTime] + (Math.random() * 6 - 3);
-            if (isNaN(liveC)) liveC = cadenceTargets[currentTime] + (Math.random() * 4 - 2);
+        document.getElementById('t-power').innerText = targetData[secondsElapsed] || 0;
+        riderData[secondsElapsed] = liveP;
+        powerHistory.push(liveP);
+        chart.update();
 
-            const speed = (liveW / 6) + 10;
-            totalDist += (speed / 3600);
+        document.getElementById('time-left').innerText = formatTime(totalSeconds - secondsElapsed);
+        document.getElementById('live-distance').innerText = ((liveS / 3600) * secondsElapsed).toFixed(2);
+    }, 1000);
 
-            document.getElementById('t-watts').innerText = workoutData[currentTime];
-            document.getElementById('l-watts').innerText = Math.round(liveW);
-            document.getElementById('l-cad').innerText = Math.round(liveC);
-            document.getElementById('l-speed').innerText = speed.toFixed(1);
-            document.getElementById('l-dist').innerText = totalDist.toFixed(2);
-            document.getElementById('time-rem').innerText = formatTime(workoutData.length - currentTime);
+    function toggleSession() {
+        isRunning = !isRunning;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = isRunning ? "STOP SESSION" : "START SESSION";
+        btn.classList.toggle('btn-running', isRunning);
+        if (!isRunning) { secondsElapsed = 0; powerHistory = []; loadProfile(); }
+    }
 
-            performanceData[currentTime] = liveW;
-            workoutChart.update('none');
+    function formatTime(s) { return Math.floor(s/60) + ":" + (s%60).toString().padStart(2, '0'); }
+    function switchMode(m) {
+        document.getElementById('tab-universal').className = m === 'universal' ? 'mode-tab active' : 'mode-tab';
+        document.getElementById('tab-smart').className = m === 'smart' ? 'mode-tab active' : 'mode-tab';
+    }
 
-            const msg = document.getElementById('coach-msg');
-            if (liveW < workoutData[currentTime] - 10) { msg.innerText = "MORE POWER!"; msg.style.color = "var(--warning)"; }
-            else { msg.innerText = "KEEP IT THERE!"; msg.style.color = "var(--success)"; }
-
-            currentTime++;
-        }
-
-        function resetRide() {
-            clearInterval(activeInterval);
-            activeInterval = null;
-            loadWorkout();
-            document.getElementById('coach-msg').innerText = "READY TO RIDE";
-            document.getElementById('l-dist').innerText = "0.00";
-            document.getElementById('time-rem').innerText = "00:00";
-        }
-
-        function formatTime(s) {
-            const m = Math.floor(s/60);
-            const rs = s%60;
-            return `${m}:${rs.toString().padStart(2,'0')}`;
-        }
-
-        window.onload = () => {
-            loadWorkout();
-            setInterval(checkSensors, 2000);
-        };
-    </script>
+    // Load profile on page ready and on input change
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('workout-type').addEventListener('change', loadProfile);
+        document.getElementById('initial-ftp').addEventListener('input', loadProfile);
+        document.getElementById('latest-ftp').addEventListener('input', loadProfile);
+        loadProfile();
+    });
+</script>
 </body>
 </html>
