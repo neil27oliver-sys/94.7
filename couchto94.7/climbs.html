@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Climbs | Couch to 94.7</title>
+    <style>
+        :root {
+            --sky-blue: #00B4D8;
+            --dark: #0f0f0f;
+            --card: #1a1a1a;
+            --muted: #a0b0c0;
+            --red: #ff4d4d;
+            --green: #2ecc71;
+            --warning: #f1c40f;
+        }
+        body { background: var(--dark); color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; padding: 0; }
+
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1rem; border-bottom: 3px solid var(--sky-blue); }
+        nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; flex-shrink: 0; }
+        nav a.active { color: var(--sky-blue); }
+
+        
+
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; }
+
+        .sensor-config { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; border-left: 6px solid var(--sky-blue); }
+        #bt-status { text-align: center; padding: 12px; font-size: 0.8rem; color: var(--warning); font-weight: bold; text-transform: uppercase; border: 2px solid #333; border-radius: 8px; margin-top: 10px; background: #000; }
+        .physics-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .btn-pair { width: 100%; background: var(--sky-blue); color: #000; border: none; padding: 18px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 900; text-transform: uppercase; }
+
+        .input-box label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, select { 
+            width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; font-size: 1.1rem; 
+            font-weight: bold; text-align: center; border-radius: 8px;
+        }
+
+        .climb-card { background: var(--card); border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 2px solid #333; }
+        .gradient-display { background: #000; padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; border: 2px solid #444; }
+        #slope-val { font-size: 2.5rem; color: var(--red); font-weight: 900; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat-box { background: #1a1a1a; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--sky-blue); }
+        .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        .stat-value { font-size: 2.4rem; font-weight: 900; color: var(--sky-blue); line-height: 1.1; }
+
+        .btn-start { width: 100%; padding: 22px; background: var(--green); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1.5rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-running { background: var(--red) !important; color: white !important; }
+        
+        .btn-clear { 
+            width: 100%; 
+            background: #000; 
+            color: var(--red); 
+            border: 3px solid #fff; 
+            padding: 15px; 
+            margin-top: 25px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+         .spotify-btn { background: #1DB954; color: #000; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="physical.html">Physical</a>
+    <a href="indoor.html">Indoor</a>
+    <a href="climbs.html"class="active">Climbs</a>
+    <a href="outdoor.html" >Outdoor</a>
+    <a href="streching.html">Streching</a>
+    <a href="mindset.html">Mindset</a>
+    <a href="Sensor.html">Sensor</a>
+    <a href="bike-fit.html">Bike-fit</a>
+    <a href="manual.html">Manual</a>
+    </div>
+    <a href="https://open.spotify.com" target="_blank" class="spotify-btn">SPOTIFY</a>
+</nav>
+
+<div class="container">
+    <div class="sensor-config">
+        <button class="btn-pair" onclick="connectEverything()">1. PAIR SENSORS</button>
+        <div id="bt-status">STATUS: READY TO SCAN</div>
+        
+        <div class="physics-inputs">
+            <div class="input-box">
+                <label>Aero Profile</label>
+                <select id="aero-profile">
+                    <option value="0.26">Aero (Racing)</option>
+                    <option value="0.36" selected>Standard (Hoods)</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <label>Weight (kg)</label>
+                <input type="number" id="user-weight" value="73">
+            </div>
+        </div>
+    </div>
+
+    <div class="climb-card">
+        <div class="input-box">
+            <label>Select Your Mountain</label>
+            <select id="climb-id" onchange="updateClimb()">
+                <option value="0">Flat Road (0%)</option>
+                <option value="4">Rolling Hills (4%)</option>
+                <option value="7">Suikerbosrand (7%)</option>
+                <option value="10">Alpe d'Huez (10%)</option>
+            </select>
+        </div>
+
+        <div class="gradient-display">
+            GRADIENT: <span id="slope-val">0%</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-label">KM/H</div><div id="m-speed" class="stat-value">0.0</div></div>
+            <div class="stat-box"><div class="stat-label">Watts</div><div id="m-power" class="stat-value">0</div></div>
+            <div class="stat-box"><div class="stat-label">BPM</div><div id="m-hr" class="stat-value">--</div></div>
+            <div class="stat-box"><div class="stat-label">Trip KM</div><div id="m-dist" class="stat-value">0.00</div></div>
+        </div>
+    </div>
+
+    <button id="startBtn" class="btn-start" onclick="toggleClimb()">START CLIMB</button>
+    <button id="clearBtn" class="btn-clear" onclick="resetAllData()">RESTART / CLEAR DATA</button>
+</div>
+
+<script>
+    // Global Data Store
+    let rideData = {
+        speed: 0,
+        power: 0,
+        hr: "--",
+        distance: 0,
+        isClimbing: false,
+        deviceName: "NONE"
+    };
+
+    let lastWheelRevs = 0;
+    let lastWheelTime = 0;
+    let lastSignalTime = 0;
+    const wheelCircum = 2.105;
+
+    // Fixed Reset Function
+    function resetAllData() {
+        if (confirm("Reset current climb and distance?")) {
+            rideData.distance = 0;
+            rideData.speed = 0;
+            rideData.power = 0;
+            document.getElementById('m-dist').innerText = "0.00";
+            document.getElementById('m-speed').innerText = "0.0";
+            document.getElementById('m-power').innerText = "0";
+            console.log("Data cleared successfully.");
+        }
+    }
+
+    function updateClimb() {
+        document.getElementById('slope-val').textContent = document.getElementById('climb-id').value + "%";
+    }
+
+    function toggleClimb() {
+        rideData.isClimbing = !rideData.isClimbing;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = rideData.isClimbing ? "STOP CLIMB" : "START CLIMB";
+        btn.classList.toggle('btn-running');
+    }
+
+    async function connectEverything() {
+        const status = document.getElementById('bt-status');
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [0x1816, 0x1818, 0x180D, 'cycling_speed_and_cadence', 'cycling_power', 'heart_rate']
+            });
+            const server = await device.gatt.connect();
+            rideData.deviceName = device.name.toUpperCase();
+            status.textContent = "CONNECTED: " + rideData.deviceName;
+            status.style.color = "var(--green)";
+
+            // Power
+            try {
+                const s = await server.getPrimaryService(0x1818);
+                const c = await s.getCharacteristic(0x2A63);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    rideData.power = e.target.value.getInt16(2, true);
+                    lastSignalTime = Date.now();
+                });
+                await c.startNotifications();
+            } catch (e) {}
+
+            // Speed
+            try {
+                const s = await server.getPrimaryService(0x1816);
+                const c = await s.getCharacteristic(0x2A5B);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    const v = e.target.value;
+                    const flags = v.getUint8(0);
+                    if (flags & 0x01) {
+                        const revs = v.getUint32(1, true);
+                        const time = v.getUint16(5, true);
+                        if (lastWheelTime > 0 && time !== lastWheelTime) {
+                            let dt = (time - lastWheelTime) / 1024;
+                            if (dt < 0) dt += 64; 
+                            rideData.speed = ((revs - lastWheelRevs) * wheelCircum / dt) * 3.6;
+                        }
+                        lastWheelRevs = revs; lastWheelTime = time;
+                        lastSignalTime = Date.now();
+                    }
+                });
+                await c.startNotifications();
+            } catch (e) {}
+
+            // Heart Rate
+            try {
+                const s = await server.getPrimaryService(0x180D);
+                const c = await s.getCharacteristic(0x2A37);
+                c.addEventListener('characteristicvaluechanged', e => { 
+                    rideData.hr = e.target.value.getUint8(1); 
+                });
+                await c.startNotifications();
+            } catch (e) {}
+        } catch (err) { status.textContent = "PAIR ERROR: " + err.message; }
+    }
+
+    // Main Loop (Runs every second)
+    setInterval(() => {
+        const weight = parseFloat(document.getElementById('user-weight').value) || 73;
+        const cda = parseFloat(document.getElementById('aero-profile').value) || 0.36;
+        const slope = parseFloat(document.getElementById('climb-id').value) / 100;
+
+        // Timeout check (4 seconds)
+        if (Date.now() - lastSignalTime > 4000) {
+            rideData.speed = 0;
+            rideData.power = 0;
+        }
+
+        let outS = 0;
+        let outP = 0;
+
+        if (rideData.power > 5) {
+            outP = rideData.power;
+            // Solve for Speed based on Watts
+            let v = (rideData.speed > 0) ? rideData.speed / 3.6 : 5;
+            for(let i=0; i<5; i++) {
+                let p_calc = (0.5 * 1.225 * cda * Math.pow(v, 3)) + (weight * 9.81 * (0.005 + slope) * v);
+                v = v * (rideData.power / p_calc);
+            }
+            outS = v * 3.6;
+        } else if (rideData.speed > 0.5) {
+            outS = rideData.speed;
+            const vMS = outS / 3.6;
+            const pDrag = 0.5 * 1.225 * cda * Math.pow(vMS, 3);
+            const pRoll = weight * 9.81 * 0.005 * vMS;
+            const pGrav = weight * 9.81 * slope * vMS;
+            outP = (pDrag + pRoll + pGrav) / 0.95;
+        }
+
+        // Update Screen
+        document.getElementById('m-speed').innerText = outS.toFixed(1);
+        document.getElementById('m-power').innerText = Math.round(outP);
+        document.getElementById('m-hr').innerText = rideData.hr;
+
+        if (rideData.isClimbing && outS > 0.1) {
+            rideData.distance += (outS / 3600);
+            document.getElementById('m-dist').innerText = rideData.distance.toFixed(2);
+        }
+    }, 1000);
+</script>
+</body>
+</html>
