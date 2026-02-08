@@ -3,62 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bike Fit Optimization - Couch to 94.7</title>
+    <title>Bike Fit | Couch to 94.7</title>
     <style>
-        /* Same CSS as index.html for consistency */
-        :root { --royal-blue: #003087; --sky-blue: #00B4D8; --light-gray: #F5F7FA; --white: #FFFFFF; --dark-gray: #2D3436; }
-        body { margin: 0; font-family: Arial, sans-serif; background: var(--light-gray); color: var(--dark-gray); }
-        header { background: linear-gradient(var(--royal-blue), var(--sky-blue)); padding: 60px 20px; text-align: center; color: white; }
-        main { padding: 20px; max-width: 800px; margin: auto; }
-        .card { background: white; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: var(--royal-blue); }
-        ul { line-height: 1.8; }
-        .note { background: var(--sky-blue); color: white; padding: 15px; border-radius: 8px; margin: 20px 0; }
-        nav { /* same bottom nav as index */ }
+        :root {
+            --sky-blue: #00B4D8;
+            --dark: #0f0f0f;
+            --card: #1a1a1a;
+            --muted: #a0b0c0;
+            --warning: #f1c40f;
+            --green: #2ecc71;
+        }
+        body { background: var(--dark); color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; padding: 0; }
+
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1rem; border-bottom: 3px solid var(--sky-blue); }
+        nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; flex-shrink: 0; }
+        nav a.active { color: var(--sky-blue); }
+
+        header { padding: 40px 20px; text-align: center; background: linear-gradient(180deg, #000 0%, var(--card) 100%); border-bottom: 1px solid #333; }
+        header h1 { color: var(--sky-blue); margin: 0; font-size: 1.8rem; text-transform: uppercase; }
+        header p { color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
+
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; }
+
+        .fit-card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; border-left: 6px solid var(--sky-blue); border-bottom: 2px solid #333; }
+        .fit-card h2 { color: var(--sky-blue); font-size: 1.1rem; margin-top: 0; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .fit-card p { font-size: 0.95rem; line-height: 1.6; color: #ddd; font-family: 'Arial', sans-serif; }
+        
+        .formula-box { background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--sky-blue); margin: 10px 0; font-family: monospace; color: var(--warning); text-align: center; font-size: 1.1rem; }
+
+        .tip-box { background: rgba(46, 204, 113, 0.1); border: 2px solid var(--green); border-radius: 12px; padding: 15px; margin-top: 30px; }
+        .tip-box strong { color: var(--green); text-transform: uppercase; display: block; margin-bottom: 5px; }
+
+        .highlight { color: var(--sky-blue); font-weight: bold; }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="index.html"><h2><span class="highlight">HOME</h2></a> 
-            
-    </nav>
-    <header>
-        <h1>Bike Fit Optimization Guide</h1>
-        <p>Dial your setup for power, comfort, and injury prevention</p>
-    </header>
 
-    <main>
-        <div class="card">
-            <h2>1. Frame Size Basics</h2>
-            <p>Rough guide by height: 160-170cm → 51-54cm frame, etc. Check manufacturer charts.</p>
-        </div>
+<nav>
+    <a href="index.html">Home</a>
+    
+</nav>
 
-        <div class="card">
-            <h2>2. Saddle Height (LeMond Method)</h2>
-            <p>Inseam (cm) × 0.883 = BB center to saddle top.<br>On-bike: 25-35° knee bend at bottom stroke.</p>
-        </div>
+<header>
+    <h1>Bike Fit Optimization</h1>
+    <p>Maximum Power. Minimum Pain.</p>
+</header>
 
-        <div class="card">
-            <h2>3. Saddle Fore/Aft – KOPS Rule Explained</h2>
-            <p>Cranks horizontal (3 o'clock). Drop plumb line from tibial tuberosity (bump below kneecap).<br>Line should pass over pedal spindle center.<br><strong>Note:</strong> Great starting point, but not gospel—fine-tune by feel (no pain, stable hips).</p>
-        </div>
+<div class="container">
 
-        <div class="card">
-            <h2>4. Handlebar Reach & Drop</h2>
-            <p>Elbows slightly bent, flat back, relaxed neck. Bars 0-10cm below saddle.</p>
-        </div>
+    <div class="fit-card">
+        <h2>1. Frame Size</h2>
+        <p>Before you tweak, ensure the foundation is right. A frame that is too large will cause lower back pain; too small will cramp your lungs.</p>
+        <p><span class="highlight">Quick Check:</span> You should have 1-2 inches of clearance over the top tube when standing over the bike.</p>
+    </div>
 
-        <div class="card">
-            <h2>5. Cleat Position & Common Fixes</h2>
-            <p>Ball of foot over axle. Adjust if hot spots or knee tracking issues.</p>
-        </div>
+    <div class="fit-card">
+        <h2>2. Saddle Height</h2>
+        <p>Using the <span class="highlight">LeMond Method</span> for a powerful stroke:</p>
+        <div class="formula-box">Inseam (cm) × 0.883 = Height</div>
+        <p>Measure from the center of the Bottom Bracket (the crank bolt) to the very top of the saddle. When pedaling, your knee should have a slight bend (25-35°) at the bottom.</p>
+    </div>
 
-        <div class="note">
-            <strong>Pro Tip:</strong> Make one change at a time (2-5mm). Test on short rides. If pain persists → professional fit.<br>
-            <strong>VO2 Max Bonus:</strong> A dialed fit improves oxygen efficiency and power output—your intervals will hit harder!
-        </div>
-    </main>
+    
 
-    <!-- Bottom nav linking back to index/training/etc -->
+    <div class="fit-card">
+        <h2>3. Saddle Fore/Aft (KOPS)</h2>
+        <p>The <span class="highlight">Knee Over Pedal Spindle</span> rule ensures your power is driving directly into the drivetrain.</p>
+        <p>With cranks horizontal (3 o'clock), a plumb line dropped from the bony bump below your kneecap should bisect the pedal axle perfectly.</p>
+    </div>
+
+    
+
+    <div class="fit-card">
+        <h2>4. Reach & Drop</h2>
+        <p>If your hands go numb, your reach is likely too long. You want a 90° angle between your torso and your upper arms when resting on the hoods.</p>
+        <p><span class="highlight">Drop:</span> Racing position is lower, but for the 94.7, comfort is speed. Keep bars 0-5cm below saddle height for endurance.</p>
+    </div>
+
+    <div class="fit-card">
+        <h2>5. Cleat Alignment</h2>
+        <p>Position the cleats so the ball of your foot is directly over the pedal spindle. Angle them so your natural "heel-in" or "heel-out" gait is respected to save your ACLs.</p>
+    </div>
+
+    <div class="tip-box">
+        <strong>Pro Tip for the 94.7:</strong>
+        <p style="margin:0; font-family:Arial; font-size:0.9rem;">Make adjustments in <span class="highlight">3mm increments</span>. A 1cm jump in saddle height is enough to cause an Achilles injury overnight. Small tweaks, big results!</p>
+    </div>
+
+</div>
+
 </body>
 </html>
