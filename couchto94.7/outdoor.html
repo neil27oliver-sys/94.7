@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>94.7 | Outdoor Lab (Full Sensor)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --sky-blue: #00B4D8; --success: #2ecc71; --danger: #ff0000; }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; }
+
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1.5rem; border-bottom: 4px solid #fff; position: sticky; top: 0; z-index: 1000; }
+        nav a { color: #fff; text-decoration: none; font-weight: 900; text-transform: uppercase; font-size: 0.8rem; flex-shrink: 0; }
+        nav a.active { color: var(--sky-blue); text-decoration: underline; }
+
+        main { max-width: 900px; margin: 0 auto; padding: 0.5rem; }
+
+        .glance-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+        .hud-box { background: #000; padding: 1.2rem 0.2rem; border: 3px solid #fff; text-align: center; }
+        .hud-box label { color: #fff; font-size: 0.7rem; font-weight: 900; display: block; margin-bottom: 5px;}
+        .hud-box .value { font-size: 3rem; font-weight: 900; line-height: 1; display: block; }
+
+        #map { height: 320px; width: 100%; border: 3px solid #fff; margin-bottom: 1rem; }
+
+        .slider-section { background: #111; padding: 1.5rem; border: 3px solid var(--sky-blue); margin-bottom: 1rem; text-align: center; }
+        .slider-section label { font-size: 1.1rem; color: var(--sky-blue); font-weight: 900; display: block; margin-bottom: 10px; }
+        #weight-slider { width: 100%; height: 60px; cursor: pointer; }
+        .cal-result { font-size: 1.8rem; font-weight: 900; color: #fff; margin-top: 10px; }
+
+        .metrics-card { background: #000; border: 3px solid #fff; padding: 0.2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #fff; font-size: 0.8rem; padding: 10px; border-bottom: 4px solid #fff;}
+        td { padding: 18px 8px; border-bottom: 1px solid #444; font-size: 1.3rem; font-weight: 900; }
+        .sensor-cell { text-align: right; border-left: 2px solid #444; font-size: 1.5rem; color: #fff; }
+
+        .controls { display: flex; gap: 10px; margin: 1.5rem 0; padding-bottom: 3rem; }
+        .btn { flex: 1; padding: 1.5rem; border: 4px solid #fff; font-weight: 900; font-size: 1.3rem; cursor: pointer; text-transform: uppercase; }
+        .btn-start { background: var(--success); color: #000; }
+        .btn-stop { background: var(--danger); color: #fff; }
+        .btn-clear { background: #333; color: #fff; border: 4px solid #fff; }
+        
+        #bt-status { text-align: center; padding: 15px; font-weight: 900; color: var(--danger); border: 2px solid #333; margin-top: 10px; font-size: 0.8rem;}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="physical.html">Physical</a>
+    <a href="indoor.html">Indoor</a>
+    <a href="climbs.html">Climbs</a>
+    <a href="outdoor.html" class="active">Outdoor</a>
+    <a href="streching.html">streching</a>
+    <a href="mindset.html">Mindset</a>
+    <a href="Sensor.html">Sensor</a>
+    <a href="bike-fit.html">Bike-fit</a>
+    <a href="manual.html">Manual</a>
+</nav>
+
+<main>
+    <div class="glance-container">
+        <div class="hud-box"><label>GPS SPEED</label><span id="speed-hud" class="value">0.0</span></div>
+        <div class="hud-box"><label>HR</label><span id="heart-rate" class="value">--</span></div>
+        <div class="hud-box"><label>GPS DIST</label><span id="dist-hud" class="value">0.0</span></div>
+    </div>
+
+    <div id="map"></div>
+
+    <section class="slider-section">
+        <label>CALIBRATION SLIDER</label>
+        <input type="range" id="weight-slider" min="-20" max="20" value="0" oninput="updateCal()">
+        <div class="cal-result">
+            Adjustment: <span id="adj-val">0</span>kg | Final: <span id="final-w" style="color:var(--sky-blue)">70</span>kg
+        </div>
+    </section>
+
+    <div class="metrics-card">
+        <table>
+            <thead><tr><th>METRIC</th><th style="text-align: right;">GPS</th><th style="text-align: right;">SENSOR</th></tr></thead>
+            <tbody>
+                <tr><td>LIVE SPD</td><td style="text-align:right" id="gps-spd-val">0.0</td><td class="sensor-cell" id="sens-spd-val">0.0</td></tr>
+                <tr><td>AVG SPD</td><td style="text-align:right" id="gps-avg-val">0.0</td><td class="sensor-cell" id="sens-avg-val">0.0</td></tr>
+                <tr><td>EST PWR</td><td style="text-align:right">--</td><td class="sensor-cell" id="sens-pwr-val">0 W</td></tr>
+                <tr><td>DISTANCE</td><td style="text-align:right" id="gps-dist-val">0.0</td><td class="sensor-cell" id="sens-dist-val">0.0</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="bt-status">STATUS: DISCONNECTED</div>
+
+    <div class="controls">
+        <button id="masterStart" class="btn btn-start" onclick="toggleRide()">START RIDE</button>
+        <button class="btn" style="background:#fff; color:#000;" onclick="pairSensors()">CONNECT SENSORS</button>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, riderTrack, marker, isTracking = false;
+    let path = [], gpsDistance = 0, lastPos = null;
+    let gpsSpeeds = [], sensorSpeeds = [], liveS = 0, sensorDist = 0;
+    let liveHR = "--";
+    let liveP = 0; // For power if available
+
+    let lastWheelRevs = 0, lastWheelTime = 0;
+    const baseWeight = 70;
+    const wheelCircum = 2.105;
+
+    let connectedSensors = []; // Track all connected types
+    let deviceName = "NONE";
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false, attributionControl: false }).setView([-26.1, 28.0], 13); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        riderTrack = L.polyline([], { color: '#ff0000', weight: 8 }).addTo(map);
+        marker = L.circleMarker([0,0], { radius: 10, color: '#000', fillColor: '#ff0000', fillOpacity: 1 }).addTo(map);
+    }
+
+    function updateCal() {
+        const adj = parseInt(document.getElementById('weight-slider').value);
+        document.getElementById('adj-val').innerText = (adj > 0 ? "+" : "") + adj;
+        document.getElementById('final-w').innerText = baseWeight + adj;
+        updateSensorDisplay();
+    }
+
+    function updateSensorStatus() {
+        const statusEl = document.getElementById('bt-status');
+        let text = deviceName !== "NONE" ? deviceName : "STATUS: DISCONNECTED";
+        if (connectedSensors.length > 0) {
+            text += " | LIVE: " + connectedSensors.join(" + ");
+            statusEl.style.color = "#2ecc71";
+        } else {
+            statusEl.style.color = "var(--danger)";
+        }
+        statusEl.innerText = text;
+    }
+
+    async function pairSensors() {
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['cycling_speed_and_cadence', 'heart_rate', 'cycling_power']
+            });
+            const server = await device.gatt.connect();
+            deviceName = device.name?.toUpperCase() || "UNKNOWN DEVICE";
+
+            // Power (if available)
+            try {
+                const powS = await server.getPrimaryService('cycling_power');
+                const powC = await powS.getCharacteristic('cycling_power_measurement');
+                powC.addEventListener('characteristicvaluechanged', e => {
+                    liveP = e.target.value.getInt16(2, true); // Instantaneous power
+                });
+                await powC.startNotifications();
+                if (!connectedSensors.includes("PWR")) connectedSensors.push("PWR");
+            } catch (e) {}
+
+            // Speed & Cadence
+            try {
+                const cscS = await server.getPrimaryService('cycling_speed_and_cadence');
+                const cscC = await cscS.getCharacteristic('csc_measurement');
+                cscC.addEventListener('characteristicvaluechanged', e => {
+                    const v = e.target.value;
+                    const flags = v.getUint8(0);
+                    if (flags & 0x01) {
+                        const wheelRevs = v.getUint32(1, true);
+                        const wheelTime = v.getUint16(5, true);
+                        if (lastWheelTime > 0 && wheelTime !== lastWheelTime) {
+                            let dt = (wheelTime - lastWheelTime) / 1024;
+                            if (dt < 0) dt += 64;
+                            const revDiff = wheelRevs - lastWheelRevs;
+                            liveS = (revDiff * wheelCircum / dt) * 3.6;
+                            sensorDist += (revDiff * wheelCircum) / 1000;
+                            if(isTracking && liveS > 1) sensorSpeeds.push(liveS);
+                            updateSensorDisplay();
+                        }
+                        lastWheelRevs = wheelRevs; 
+                        lastWheelTime = wheelTime;
+                    }
+                });
+                await cscC.startNotifications();
+                if (!connectedSensors.includes("SPD")) connectedSensors.push("SPD");
+            } catch (e) {}
+
+            // Heart Rate
+            try {
+                const hrS = await server.getPrimaryService('heart_rate');
+                const hrC = await hrS.getCharacteristic('heart_rate_measurement');
+                hrC.addEventListener('characteristicvaluechanged', e => { 
+                    liveHR = e.target.value.getUint8(1); 
+                    document.getElementById('heart-rate').innerText = liveHR;
+                });
+                await hrC.startNotifications();
+                if (!connectedSensors.includes("HR")) connectedSensors.push("HR");
+            } catch (e) {}
+
+            updateSensorStatus();
+            updateSensorDisplay();
+
+        } catch (err) {
+            document.getElementById('bt-status').innerText = "CONN ERROR: TRY AGAIN";
+        }
+    }
+
+    function updateSensorDisplay() {
+        const weight = baseWeight + parseInt(document.getElementById('weight-slider').value);
+        document.getElementById('sens-spd-val').innerText = liveS.toFixed(1);
+        document.getElementById('sens-dist-val').innerText = sensorDist.toFixed(2);
+        const avg = sensorSpeeds.length ? (sensorSpeeds.reduce((a,b)=>a+b,0)/sensorSpeeds.length).toFixed(1) : "0.0";
+        document.getElementById('sens-avg-val').innerText = avg;
+        
+        const pwr = liveP > 0 ? liveP : (Math.pow(liveS, 3) * 0.016) + (liveS * weight * 0.035);
+        document.getElementById('sens-pwr-val').innerText = Math.round(pwr) + " W";
+    }
+
+    function toggleRide() {
+        if (!isTracking) {
+            // Start ride
+            isTracking = true;
+            const btn = document.getElementById('masterStart');
+            btn.innerText = "STOP RIDE";
+            btn.classList.remove('btn-start');
+            btn.classList.add('btn-stop');
+
+            navigator.geolocation.watchPosition((pos) => {
+                if(!isTracking) return;
+                const { latitude, longitude, speed } = pos.coords;
+                const kmh = (speed * 3.6) || 0;
+                if(kmh > 1) gpsSpeeds.push(kmh);
+                
+                document.getElementById('speed-hud').innerText = kmh.toFixed(1);
+                document.getElementById('gps-spd-val').innerText = kmh.toFixed(1);
+                
+                const gpsAvg = gpsSpeeds.length ? (gpsSpeeds.reduce((a,b)=>a+b,0)/gpsSpeeds.length).toFixed(1) : "0.0";
+                document.getElementById('gps-avg-val').innerText = gpsAvg;
+
+                if (lastPos) { gpsDistance += map.distance(lastPos, [latitude, longitude]) / 1000; }
+                lastPos = [latitude, longitude];
+                
+                document.getElementById('dist-hud').innerText = gpsDistance.toFixed(1);
+                document.getElementById('gps-dist-val').innerText = gpsDistance.toFixed(1);
+
+                path.push(lastPos);
+                riderTrack.setLatLngs(path);
+                marker.setLatLng(lastPos);
+                map.panTo(lastPos);
+            }, null, { enableHighAccuracy: true });
+        } else {
+            // Stop ride → change button to CLEAR DATA
+            isTracking = false;
+            const btn = document.getElementById('masterStart');
+            btn.innerText = "CLEAR DATA";
+            btn.classList.remove('btn-stop');
+            btn.classList.add('btn-clear');
+            btn.onclick = clearRideData; // Switch to clear function
+        }
+    }
+
+    function clearRideData() {
+        if (!confirm("Clear all ride data?")) return;
+
+        // Reset everything
+        gpsDistance = 0;
+        sensorDist = 0;
+        gpsSpeeds = [];
+        sensorSpeeds = [];
+        path = [];
+        lastPos = null;
+        liveS = 0;
+        liveHR = "--";
+        liveP = 0;
+
+        // Clear map
+        riderTrack.setLatLngs([]);
+        marker.setLatLng([0,0]);
+        map.setView([-26.1, 28.0], 13);
+
+        // Reset displays
+        document.getElementById('speed-hud').innerText = "0.0";
+        document.getElementById('dist-hud').innerText = "0.0";
+        document.getElementById('gps-spd-val').innerText = "0.0";
+        document.getElementById('gps-dist-val').innerText = "0.0";
+        document.getElementById('gps-avg-val').innerText = "0.0";
+        document.getElementById('sens-spd-val').innerText = "0.0";
+        document.getElementById('sens-dist-val').innerText = "0.0";
+        document.getElementById('sens-avg-val').innerText = "0.0";
+        document.getElementById('sens-pwr-val').innerText = "0 W";
+        document.getElementById('heart-rate').innerText = "--";
+
+        // Reset button back to START
+        const btn = document.getElementById('masterStart');
+        btn.innerText = "START RIDE";
+        btn.classList.remove('btn-clear');
+        btn.classList.add('btn-start');
+        btn.onclick = toggleRide;
+    }
+
+    window.onload = initMap;
+</script>
+<footer class="outdoor-tip" style="margin-top: 2rem; padding: 1.5rem; background: rgba(7, 0, 0, 0); border-radius: 8px; text-align: center; font-size: 0.95rem; color: #ec080c;">
+  <p><strong>Quick Note on Screen Sleep:</strong></p>
+  <p>To preserve your battery during long rides, most phones automatically turn off the screen after about 5 minutes of inactivity.</p>
+  <p><strong>To bring your live data back:</strong> Just tap anywhere on the screen – it wakes instantly!</p>
+  <p><small>Pro tip: In your phone Settings → Display → Screen timeout, you can extend this to 10, 15, or 30 minutes for uninterrupted viewing during outdoor sessions. (Remember to reset it afterward to save power.)</small></p>
+  <p style="margin-top: 1rem; font-weight: bold;">Ride safe, stay aware of your surroundings! 🚴‍♂️</p>
+</footer>
+</body>
+</html>
