@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>94.7 | Injury Prevention</title>
+  <style>
+    :root {
+      --royal-blue: #003087;
+      --sky-blue: #00B4D8;
+      --dark: #0f0f0f;
+      --card: #1a1a1a;
+      --text: #f0f4f8;
+      --muted: #a0b0c0;
+      --orange: #ff9500;
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+    
+    body { 
+      background: var(--dark); 
+      color: var(--text); 
+      font-family: system-ui, sans-serif; 
+      line-height: 1.5; 
+    }
+
+    /* --- Navigation --- */
+    nav {
+      background: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      border-bottom: 3px solid var(--sky-blue);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.8px;
+    }
+
+    nav a.active, nav a:hover { color: var(--sky-blue); }
+
+    /* --- Main Layout --- */
+    main { max-width: 900px; margin: 2.5rem auto; padding: 0 1.5rem; }
+    
+    header { text-align: center; margin-bottom: 2.5rem; }
+    
+    h1 { color: var(--sky-blue); font-size: 2.4rem; margin-bottom: 0.4rem; }
+    
+    .subtitle { color: var(--muted); font-size: 1.05rem; }
+
+    /* --- Intro Card --- */
+    .intro-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 2rem;
+      border-left: 5px solid var(--sky-blue);
+      margin-bottom: 2.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .intro-card h2 { color: var(--sky-blue); margin-bottom: 1rem; }
+
+    /* --- Exercise Grid --- */
+    .exercise-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .exercise-card {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid #333;
+      transition: transform 0.2s;
+    }
+
+    .exercise-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--sky-blue);
+    }
+
+    .exercise-img {
+      width: 35%;
+      min-width: 150px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .exercise-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .exercise-content {
+      padding: 1.5rem;
+      flex: 1;
+    }
+
+    .exercise-content h3 {
+      color: var(--sky-blue);
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+      text-transform: uppercase;
+    }
+
+    .exercise-content p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .reps-tag {
+      display: inline-block;
+      background: rgba(0, 180, 216, 0.15);
+      color: var(--sky-blue);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid var(--sky-blue);
+    }
+
+    /* --- Footer Pro Tip --- */
+    .pro-tip {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: rgba(255, 149, 0, 0.1);
+      border-radius: 12px;
+      border-left: 5px solid var(--orange);
+      text-align: center;
+    }
+
+    .pro-tip h3 { color: var(--orange); margin-bottom: 0.5rem; }
+
+    /* --- Responsive --- */
+    @media (max-width: 700px) {
+      .exercise-card { flex-direction: column; }
+      .exercise-img { width: 100%; height: 200px; }
+      nav { gap: 1rem; padding: 1rem; flex-wrap: wrap; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+<nav>
+    <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+        
+</nav>
+<main>
+  <header>
+    <h1>Stretching Exercises</h1>
+    <p class="subtitle">Counter the repetitive stress of cycling with these targeted routines.  
+      Daily stretching enhances flexibility, improves range of motion, reduces injury risk, and alleviates stiffness.</p>
+  </header>
+
+  <section class="intro-card">
+    <h2>Protect Your Body</h2>
+    <p>Perform these exercises <strong>2–3 times per week</strong> (10–15 min) to keep your foundation strong. Focus on mobility for your hips and strength for your core to prevent knee and lower back pain.</p>
+  </section>
+
+  <div class="exercise-grid">
+
+    <!-- === NEW: PRE-RIDE WARM-UP STRETCHES (added at top) === -->
+    <h2 style="color:var(--sky-blue); text-align:center; margin: 2rem 0 1rem;">Pre-Ride Warm-Up Stretches</h2>
+    <p style="text-align:center; color:var(--muted); margin-bottom:2rem;">Quick dynamic moves to wake up the body before riding or spin class. Do these for 3–5 minutes — no long holds.</p>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <!-- Sora prompt: "Cyclist doing slow neck rolls, head circling gently side to side and around, standing beside bike, athletic wear, bright gym setting" -->
+        <img src="assets/S1.png" alt="Neck Rolls">
+      </div>
+      <div class="exercise-content">
+        <h3>Neck Rolls</h3>
+        <p>Gently circle your head to loosen the neck and upper traps — relieves tension from aero position.</p>
+        <span class="reps-tag">5–8 slow circles each direction + 5 side-to-side tilts per side</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <!-- Sora prompt: "Cyclist pulling one arm across chest with opposite hand at elbow, gentle stretch, standing, bike in background, fitness studio" -->
+        <img src="assets/S2.png" alt="Cross-Body Arm Pull">
+      </div>
+      <div class="exercise-content">
+        <h3>Cross-Body Arm Pull</h3>
+        <p>Pull one arm across your chest to open the shoulders — great before gripping handlebars.</p>
+        <span class="reps-tag">Hold 15–20s per side | 2 reps each side</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <!-- Sora prompt: "Cyclist doing shoulder rolls, arms circling forward then backward, standing posture, gym or outdoor setting" -->
+        <img src="assets/S3.png" alt="Shoulder Rolls">
+      </div>
+      <div class="exercise-content">
+        <h3>Shoulder Rolls</h3>
+        <p>Roll shoulders forward and backward to mobilize upper back and release tension.</p>
+        <span class="reps-tag">10 forward + 10 backward (smooth, big circles)</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <!-- Sora prompt: "Cyclist interlocking fingers overhead, palms up, stretching arms upward, chest lifted, standing beside road bike" -->
+        <img src="assets/S4.png" alt="Overhead Finger Interlace">
+      </div>
+      <div class="exercise-content">
+        <h3>Overhead Finger Interlace Stretch</h3>
+        <p>Interlace fingers, press palms up overhead — opens chest and shoulders.</p>
+        <span class="reps-tag">Hold 15–20s | 3 reps (breathe deeply)</span>
+      </div>
+    </div>
+
+    <!-- Original exercises below remain unchanged -->
+    <h2 style="color:var(--sky-blue); text-align:center; margin: 3rem 0 1rem;">Post-Ride / Recovery Stretches</h2>
+    <p style="text-align:center; color:var(--muted); margin-bottom:2rem;">Hold these longer to release tightness after rides. Do 2–3× per week for best results.</p>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <img src="assets/IP1.png" alt="Hip Flexor Lunge">
+      </div>
+      <div class="exercise-content">
+        <h3>Hip Flexor Lunge</h3>
+        <p>Relieves hip tightness and improves posture on the bike. Essential for preventing lower back strain during long rides.</p>
+        <span class="reps-tag">Hold 30–60s per side | 2–3 Sets</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <img src="assets/IP2.png" alt="Glute Bridge">
+      </div>
+      <div class="exercise-content">
+        <h3>Glute Bridge</h3>
+        <p>Activates the posterior chain. Strong glutes take the pressure off your knees and lower back during heavy climbing.</p>
+        <span class="reps-tag">3 Sets of 12–15 Reps</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <img src="assets/IP3.png" alt="Cat-Cow Pose">
+      </div>
+      <div class="exercise-content">
+        <h3>Cat-Cow Pose</h3>
+        <p>Improves spinal mobility. Perfect for relieving neck and back stiffness after being tucked in an aero position.</p>
+        <span class="reps-tag">10–15 Slow Breaths</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <img src="assets/IP4.png" alt="Pigeon Pose">
+      </div>
+      <div class="exercise-content">
+        <h3>Pigeon Pose</h3>
+        <p>Deeply opens the hips and glutes. This is the "gold standard" stretch for preventing IT Band Syndrome.</p>
+        <span class="reps-tag">Hold 60s per side</span>
+      </div>
+    </div>
+
+    <div class="exercise-card">
+      <div class="exercise-img">
+        <img src="assets/IP5.png" alt="Foam Rolling">
+      </div>
+      <div class="exercise-content">
+        <h3>IT Band Foam Roll</h3>
+        <p>Releases myofascial tightness along the outer thigh. Use post-ride to maintain muscle suppleness.</p>
+        <span class="reps-tag">1–2 Mins per side</span>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="pro-tip">
+    <h3>Pro Tip</h3>
+    <p>Consistency beats intensity. Ten minutes of mobility work three times a week is significantly more effective than a one-hour session once a month. Stay supple to stay fast!</p>
+  </section>
+</main>
+
+</body>
+</html>

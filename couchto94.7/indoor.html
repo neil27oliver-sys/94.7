@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Training | Couch to 94.7</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --royal-blue: #003087; --sky-blue: #00B4D8; --dark: #0f0f0f;
+            --card: #1a1a1a; --text: #f0f4f8; --muted: #a0b0c0;
+            --orange: #ff9500; --red: #ff4d4d; --green: #2ecc71; --warning: #f1c40f;
+        }
+        body { background: var(--dark); color: var(--text); font-family: 'Arial Black', sans-serif; margin: 0; padding: 0; }
+        
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1rem; border-bottom: 3px solid var(--sky-blue); }
+        nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; flex-shrink: 0; }
+        nav a.active { color: var(--sky-blue); }
+        .spotify-btn { background: #1DB954; color: #000; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; }
+
+        #bt-status { text-align: center; padding: 12px; font-size: 0.85rem; color: var(--warning); font-weight: bold; background: #000; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; text-transform: uppercase; }
+
+        .sensor-config { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; border-left: 6px solid var(--sky-blue); }
+        .btn-pair { width: 100%; background: var(--sky-blue); color: #000; border: none; padding: 18px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 900; text-transform: uppercase; }
+
+        .physics-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; background: var(--card); border-radius: 15px; margin-bottom: 20px; }
+        
+        .input-box label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; font-size: 1.1rem; font-weight: bold; text-align: center; border-radius: 8px; }
+
+        .chart-card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; border-bottom: 5px solid var(--sky-blue); }
+        .chart-container { height: 220px; position: relative; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-box { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--sky-blue); }
+        .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        .stat-value { font-size: 2.2rem; font-weight: 900; color: var(--sky-blue); line-height: 1.1; }
+
+        .tss-if-box { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; border-bottom: 4px solid var(--sky-blue); font-size: 0.9rem; }
+        .tss-label { color: var(--muted); text-transform: uppercase; font-size: 0.7rem; margin-right: 5px; }
+        .tss-val { color: var(--sky-blue); font-weight: 900; margin-right: 15px; }
+
+        .btn-start { width: 100%; padding: 22px; background: var(--green); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1.5rem; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
+        .btn-clear { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; text-transform: uppercase; display: block; margin: 0 auto; }
+        .btn-running { background: var(--red) !important; color: white !important; }
+
+        #ftp-result-box { 
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); 
+            border: 3px solid var(--warning); 
+            border-radius: 16px; 
+            padding: 25px; 
+            text-align: center; 
+            margin: 20px 0; 
+            display: none; /* Only shows when test data exists */
+        }
+        #ftp-result-box h3 { color: var(--warning); margin-bottom: 10px; }
+        #ftp-result-box .result { font-size: 3.5rem; font-weight: 900; color: var(--sky-blue); }
+        #ftp-result-box .sub-result { font-size: 1.1rem; color: var(--muted); margin: 10px 0; }
+        #ftp-result-box .note { font-size: 0.9rem; color: var(--muted); margin-top: 15px; }
+
+        .latency-note { font-size: 0.7rem; color: var(--red); text-align: center; margin-top: 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+      
+    <a href="https://open.spotify.com" target="_blank" class="spotify-btn">SPOTIFY</a>
+</nav>
+
+<div class="container">
+    <div id="bt-status">STATUS: READY TO SCAN</div>
+
+    <div class="sensor-config">
+        <button class="btn-pair" onclick="connectEverything()">1. PAIR SENSORS</button>
+        <div class="physics-inputs">
+            <div class="input-box">
+                <label>Aero Profile</label>
+                <select id="aero-profile" onchange="saveUserData()">
+                    <option value="0.24">Aero (Tucked)</option>
+                    <option value="0.30" selected>Standard (Hoods)</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <label> Weight (Rider + Bike + Kit + Road Factors)kg</label>
+                <input type="number" id="user-weight" value="80" oninput="saveUserData()">
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="input-box">
+            <label>Workout</label>
+            <select id="workout-type" onchange="loadProfile()">
+                <option value="warmup-cooldown">Warmup/Cooldown</option>
+                <option value="endurance">Endurance Base</option>
+                <option value="climb">Climbing Power</option>
+                <option value="speed">Speed Intervals</option>
+                <option value="ftptest">FTP Test (20 Min Effort)</option>
+            </select>
+        </div>
+        <div class="input-box">
+            <label>Current FTP</label>
+            <input type="number" id="latest-ftp" value="100" oninput="saveUserData(); loadProfile();">
+        </div>
+    </div>
+
+    <section class="chart-card">
+        <div class="chart-container"><canvas id="profileChart"></canvas></div>
+        <div style="text-align:center; margin-top:10px; font-weight:bold; font-size: 0.8rem;">
+            TOTAL DURATION: <span id="total-time">00:00</span>
+        </div>
+    </section>
+
+    <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Tgt / Live Watts</div><div class="stat-value"><span id="t-power">0</span>/<span id="m-power">0</span></div></div>
+        <div class="stat-box"><div class="stat-label">KM/H</div><div class="stat-value" id="m-speed">0.0</div></div>
+        <div class="stat-box"><div class="stat-label">BPM</div><div class="stat-value" id="m-hr">--</div></div>
+        <div class="stat-box"><div class="stat-label">Remaining</div><div class="stat-value" id="time-left">00:00</div></div>
+    </div>
+
+    <section class="tss-if-box">
+        <span class="tss-label">TSS:</span><span id="tss-val" class="tss-val">0</span>
+        <span class="tss-label">IF:</span><span id="if-val" class="tss-val">0.00</span>
+        <span class="tss-label">AVG HR:</span><span id="avg-hr" class="tss-val" style="margin-right:0;">0</span>
+    </section>
+
+    <button id="startBtn" class="btn-start" onclick="toggleSession()">START WORKOUT</button>
+    <button id="clearBtn" class="btn-clear" onclick="clearSession()">CLEAR SESSION</button>
+
+    <div id="ftp-result-box">
+        <div style="color:var(--warning); font-size: 0.9rem; text-transform: uppercase;">🎉 FTP Test Estimates 🎉</div>
+        <div style="font-size:3.5rem; font-weight: 900;" id="final-ftp-val">---</div>
+        <div style="font-size: 1.1rem; color: var(--muted); margin-top:10px;">
+            95% of rolling 20-min peak average power
+        </div>
+        <div style="font-size: 1.3rem; color: var(--sky-blue); margin-top:15px;">
+            Test Avg TSS: <span id="test-tss">0</span> | Test Avg IF: <span id="test-if">0.00</span> | Avg HR: <span id="test-avg-hr">0</span>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--muted); margin-top:15px;">
+            FTP, TSS and IF are estimates till exercise completed
+        </div>
+    </div>
+
+    <div class="latency-note">Note: Sensors may have a 3-5 second latency before data updates on screen.</div>
+</div>
+
+<script>
+    let chart = null, isRunning = false, secondsElapsed = 0, totalSeconds = 0;
+    let powerHistory = [], hrHistory = [], ftpSegmentPower = [], liveP = 0, liveS = 0, liveHR = "--";
+    let lastWheelRevs = 0, lastWheelTime = 0, lastUpdateTS = 0, deviceName = "NONE";
+    let connectedSensors = [];
+
+    const wheelCircum = 2.105;
+    const npWindowSec = 30;
+    let power30sWindow = [];
+
+    const PROFILES = {
+        'warmup-cooldown': [{m: 10, p: 0.45}],
+        'endurance': [{m: 10, p: 0.5}, {m: 20, p: 0.7}, {m: 10, p: 0.45}],
+        'climb': [{m: 10, p: 0.5}, {m: 10, p: 1.1}, {m: 10, p: 0.45}],
+        'speed': [{m: 5, p: 0.5}, {m: 2, p: 1.5}, {m: 3, p: 0.45}],
+        'ftptest': [{m: 10, p: 0.45}, {m: 20, p: 1.2}, {m: 10, p: 0.35}] 
+    };
+
+    let targetData = [], riderData = [];
+
+    function saveUserData() {
+        localStorage.setItem('cycle_weight', document.getElementById('user-weight').value);
+        localStorage.setItem('cycle_ftp', document.getElementById('latest-ftp').value);
+        localStorage.setItem('cycle_aero', document.getElementById('aero-profile').value);
+    }
+
+    function loadUserData() {
+        if(localStorage.getItem('cycle_weight')) document.getElementById('user-weight').value = localStorage.getItem('cycle_weight');
+        if(localStorage.getItem('cycle_ftp')) document.getElementById('latest-ftp').value = localStorage.getItem('cycle_ftp');
+        if(localStorage.getItem('cycle_aero')) document.getElementById('aero-profile').value = localStorage.getItem('cycle_aero');
+    }
+
+    function updateSensorStatus() {
+        const statusEl = document.getElementById('bt-status');
+        let text = deviceName !== "NONE" ? deviceName : "STATUS: READY TO SCAN";
+        if (connectedSensors.length > 0) {
+            text += " | LIVE: " + connectedSensors.join(" + ");
+            statusEl.style.color = "var(--green)";
+        } else {
+            statusEl.style.color = "var(--warning)";
+        }
+        statusEl.textContent = text;
+    }
+
+    async function connectEverything() {
+        const statusEl = document.getElementById('bt-status');
+        statusEl.textContent = "SCANNING...";
+        statusEl.style.color = "var(--warning)";
+
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [0x1816, 0x1818, 0x180D]
+            });
+            const server = await device.gatt.connect();
+            deviceName = device.name?.toUpperCase() || "UNKNOWN DEVICE";
+
+            try {
+                const s = await server.getPrimaryService(0x1818);
+                const c = await s.getCharacteristic(0x2A63);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    liveP = e.target.value.getInt16(2, true);
+                    lastUpdateTS = Date.now();
+                });
+                await c.startNotifications();
+                if (!connectedSensors.includes("PWR")) connectedSensors.push("PWR");
+            } catch(e) {}
+
+            try {
+                const s = await server.getPrimaryService(0x1816);
+                const c = await s.getCharacteristic(0x2A5B);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    const v = e.target.value;
+                    const revs = v.getUint32(1, true);
+                    const time = v.getUint16(5, true);
+                    if (lastWheelTime > 0 && time !== lastWheelTime) {
+                        let dt = (time - lastWheelTime) / 1024;
+                        if (dt < 0) dt += 64;
+                        liveS = ((revs - lastWheelRevs) * wheelCircum / dt) * 3.6;
+                    }
+                    lastWheelRevs = revs; lastWheelTime = time;
+                    lastUpdateTS = Date.now();
+                });
+                await c.startNotifications();
+                if (!connectedSensors.includes("SPD")) connectedSensors.push("SPD");
+            } catch(e) {}
+
+            try {
+                const s = await server.getPrimaryService(0x180D);
+                const c = await s.getCharacteristic(0x2A37);
+                c.addEventListener('characteristicvaluechanged', e => { 
+                    liveHR = e.target.value.getUint8(1); 
+                    lastUpdateTS = Date.now();
+                });
+                await c.startNotifications();
+                if (!connectedSensors.includes("HR")) connectedSensors.push("HR");
+            } catch(e) {}
+
+            updateSensorStatus();
+
+        } catch (err) {
+            statusEl.textContent = "PAIRING FAILED – TRY AGAIN";
+            statusEl.style.color = "var(--red)";
+        }
+    }
+
+    function loadProfile() {
+        const type = document.getElementById('workout-type').value;
+        const ftp = parseInt(document.getElementById('latest-ftp').value) || 100;
+        const profile = PROFILES[type] || [];
+        targetData = [];
+        profile.forEach(block => {
+            const pwr = Math.round(ftp * block.p);
+            for (let i = 0; i < (block.m * 60); i++) targetData.push(pwr);
+        });
+        totalSeconds = targetData.length;
+        // Use null so the rider line doesn't draw until data arrives
+        riderData = new Array(totalSeconds).fill(null); 
+        document.getElementById('total-time').innerText = formatTime(totalSeconds);
+        document.getElementById('time-left').innerText = formatTime(totalSeconds);
+        
+        // Show FTP result box only if it's an FTP test
+        document.getElementById('ftp-result-box').style.display = (type === 'ftptest') ? 'block' : 'none';
+        renderChart();
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('profileChart').getContext('2d');
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: targetData.map((_, i) => i),
+                datasets: [
+                    { label: 'Target', data: targetData, stepped: true, fill: true, pointRadius: 0, backgroundColor: 'rgba(0, 180, 216, 0.2)', borderColor: '#00B4D8' },
+                    { label: 'You', data: riderData, borderColor: '#FFF', borderWidth: 3, pointRadius: 0, spanGaps: false }
+                ]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { x: { display: false }, y: { beginAtZero: true, grid: { color: '#333' } } },
+                plugins: { legend: { display: false } }, animation: false 
+            }
+        });
+    }
+
+    function toggleSession() {
+        isRunning = !isRunning;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = isRunning ? "STOP WORKOUT" : "RESUME WORKOUT";
+        btn.classList.toggle('btn-running');
+    }
+
+    function clearSession() {
+        if (!confirm("Clear all session data?")) return;
+        isRunning = false;
+        secondsElapsed = 0;
+        powerHistory = [];
+        hrHistory = [];
+        ftpSegmentPower = [];
+        power30sWindow = [];
+        liveP = 0;
+        liveS = 0;
+        liveHR = "--";
+        riderData = new Array(totalSeconds).fill(null);
+        const btn = document.getElementById('startBtn');
+        btn.innerText = "START WORKOUT";
+        btn.classList.remove('btn-running');
+        document.getElementById('tss-val').innerText = "0";
+        document.getElementById('if-val').innerText = "0.00";
+        document.getElementById('avg-hr').innerText = "0";
+        document.getElementById('time-left').innerText = formatTime(totalSeconds);
+        document.getElementById('m-power').innerText = "0";
+        document.getElementById('m-speed').innerText = "0.0";
+        document.getElementById('m-hr').innerText = "--";
+        document.getElementById('t-power').innerText = "0";
+        document.getElementById('final-ftp-val').innerText = "---";
+        document.getElementById('test-tss').innerText = "0";
+        document.getElementById('test-if').innerText = "0.00";
+        document.getElementById('test-avg-hr').innerText = "0";
+        renderChart();
+    }
+
+    setInterval(() => {
+        const weight = parseFloat(document.getElementById('user-weight').value) || 75;
+        const cda = parseFloat(document.getElementById('aero-profile').value) || 0.36;
+        const currentFTP = parseInt(document.getElementById('latest-ftp').value) || 100;
+        const workoutType = document.getElementById('workout-type').value;
+
+        if (Date.now() - lastUpdateTS > 4000) { liveS = 0; liveP = 0; }
+
+        let finalS = 0, finalP = 0;
+        if (liveP > 0) {
+            finalP = liveP;
+            let vel = Math.pow(liveP / (0.5 * 1.225 * cda + 0.005), 1/3);
+            finalS = vel * 3.6;
+        } else if (liveS > 0) {
+            finalS = liveS;
+            const vms = liveS / 3.6;
+            finalP = (0.5 * 1.225 * cda * Math.pow(vms,3)) + (0.005 * weight * 9.8 * vms);
+        }
+
+        document.getElementById('m-speed').textContent = finalS.toFixed(1);
+        document.getElementById('m-power').textContent = Math.round(finalP);
+        document.getElementById('m-hr').textContent = liveHR;
+
+        if (isRunning && secondsElapsed < totalSeconds) {
+            // UPDATED: Push the current power to the rider dataset for the white line
+            riderData[secondsElapsed] = Math.round(finalP);
+            
+            powerHistory.push(finalP || 0);
+            power30sWindow.push(finalP || 0);
+            if (power30sWindow.length > npWindowSec) power30sWindow.shift();
+            if(liveHR !== "--") hrHistory.push(parseInt(liveHR));
+            
+            document.getElementById('t-power').innerText = targetData[secondsElapsed] || 0;
+            secondsElapsed++;
+            document.getElementById('time-left').innerText = formatTime(totalSeconds - secondsElapsed);
+
+            // Live NP/IF/TSS
+            let npApprox = 0;
+            if (power30sWindow.length >= npWindowSec) {
+                const fourthPowers = power30sWindow.map(p => Math.pow(p, 4));
+                const avgFourth = fourthPowers.reduce((a,b)=>a+b,0) / fourthPowers.length;
+                npApprox = Math.pow(avgFourth, 0.25);
+            } else if (powerHistory.length > 0) {
+                npApprox = powerHistory.reduce((a,b)=>a+b,0) / powerHistory.length;
+            }
+
+            const ifVal = npApprox / Math.max(currentFTP, 1); 
+            const tssVal = (secondsElapsed * npApprox * ifVal) / (Math.max(currentFTP, 1) * 3600) * 100;
+
+            document.getElementById('if-val').innerText = ifVal.toFixed(2);
+            document.getElementById('tss-val').innerText = Math.round(tssVal);
+
+            if(hrHistory.length > 0) {
+                const avgHR = hrHistory.reduce((a,b)=>a+b,0) / hrHistory.length;
+                document.getElementById('avg-hr').innerText = Math.round(avgHR);
+            }
+
+            // FTP test block
+            if (workoutType === 'ftptest' && secondsElapsed >= 600 && secondsElapsed < 1800) {
+                ftpSegmentPower.push(finalP || 0);
+            }
+
+            if (workoutType === 'ftptest' && secondsElapsed >= 600) {
+                if (ftpSegmentPower.length > 0) {
+                    const avgPower = ftpSegmentPower.reduce((a,b)=>a+b,0) / ftpSegmentPower.length;
+                    const calculatedFTP = Math.round(avgPower * 0.95);
+                    document.getElementById('final-ftp-val').innerText = calculatedFTP;
+
+                    const testDurationSec = ftpSegmentPower.length;
+                    const testIF = avgPower / Math.max(currentFTP, 1);
+                    const testTSS = (testDurationSec * avgPower * testIF) / (Math.max(currentFTP, 1) * 3600) * 100;
+                    
+                    document.getElementById('test-tss').innerText = Math.round(testTSS);
+                    document.getElementById('test-if').innerText = testIF.toFixed(2);
+                    document.getElementById('test-avg-hr').innerText = document.getElementById('avg-hr').innerText;
+                }
+            }
+            
+            // FIX: Force the chart to redraw the white line
+            chart.update('none');
+        }
+    }, 1000);
+
+    function formatTime(s) { 
+        if (s < 0) s = 0;
+        let mins = Math.floor(s/60);
+        let secs = s % 60;
+        return mins + ":" + secs.toString().padStart(2, '0'); 
+    }
+    
+    window.onload = () => { loadUserData(); loadProfile(); };
+</script>
+
+</body>
+</html>

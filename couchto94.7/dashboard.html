@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>94.7 | Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-blue: #0066cc;
+      --light-blue: #00B4D8;
+      --dark-bg: #121212;
+      --card-bg: #1e1e1e;
+      --light-text: #f4f4f4;
+      --muted-text: #b3b3b3;
+      --gold: #FFD700;
+      --green: #00ff9d;
+      --red: #ff0000;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--light-text);
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background: #000;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      border-bottom: 3px solid var(--primary-blue);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--muted-text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    nav a:hover, nav a.active { color: var(--light-blue); }
+
+    .header { text-align: center; padding: 40px 20px 20px; }
+    .highlight { color: var(--light-blue); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+    .radar-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .radar-container {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      border: 2px solid var(--primary-blue);
+    }
+
+    .radar-title {
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: var(--light-blue);
+    }
+
+    canvas { max-width: 100% !important; margin: 0 auto; }
+
+    .phase-blocks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .phase-block {
+      background: #1a1a1a;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      border: 2px solid #333;
+      transition: 0.3s;
+    }
+
+    .phase-block.active { border-color: var(--primary-blue); background: #1e1e1e; }
+
+    .phase-block h3 { color: var(--light-blue); margin: 15px 0; }
+
+    .phase-actions button {
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+
+    .phase-actions button.gold { background: var(--gold); color: #000; }
+
+    /* Modal Styling */
+    #cert-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #000;
+      padding: 40px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      border: 10px double var(--primary-blue);
+      position: relative;
+    }
+
+    .cert-logo { width: 120px; margin-bottom: 20px; }
+    .quote { font-style: italic; color: #555; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; }
+
+    .close-btn {
+      margin-top: 25px;
+      background: #333;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .prediction-container {
+        background: #1a1a1a;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 30px;
+        border-top: 4px solid #00B4D8;
+        font-family: 'Arial Black', sans-serif;
+    }
+    .prediction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .race-toggle-box {
+        background: #000;
+        padding: 8px 15px;
+        border-radius: 30px;
+        border: 1px solid #333;
+        font-size: 0.8rem;
+    }
+    .prediction-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+    .prediction-table th {
+        text-align: left;
+        font-size: 0.75rem;
+        color: #a0b0c0;
+        padding: 10px;
+        border-bottom: 1px solid #333;
+        text-transform: uppercase;
+    }
+    .prediction-table td {
+        padding: 15px 10px;
+        font-size: 1.2rem;
+        font-weight: 900;
+        border-bottom: 1px solid #222;
+        color: #f0f4f8;
+    }
+    .event-name { color: #f0f4f8; }
+    .time-solo { color: #fff; }
+    .time-race { color: #2ecc71; }
+    
+    .drafting-note {
+        background: rgba(46, 204, 113, 0.05);
+        border: 1px dashed #2ecc71;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #2ecc71;
+        margin-top: 20px;
+        line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+ <nav>
+   <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+       
+</nav>
+
+  <div class="header">
+    <h1>COUCH TO <span class="highlight">94.7</span></h1>
+    <p>Performance Tracking & Certification</p>
+  </div>
+
+  <main>
+    <div class="radar-wrapper">
+      <div class="radar-container">
+        <div class="radar-title">Strength & Mobility Radar</div>
+        <canvas id="strengthRadar"></canvas>
+      </div>
+
+      <div class="radar-container">
+        <div class="radar-title">Cycling Performance Radar</div>
+        <canvas id="cyclingRadar"></canvas>
+      </div>
+    </div>
+
+    <div class="phase-blocks">
+      <div class="phase-block" id="block-initial">
+        <h3>Foundation Cyclist</h3>
+        <p>Target: 160W FTP + 75% S&M</p>
+        <div class="phase-actions">
+          <button onclick="switchRadar('initial')">VIEW TARGETS</button>
+          <button class="gold" onclick="showCert('initial')">CERTIFICATE</button>
+        </div>
+      </div>
+
+      <div class="phase-block" id="block-foundation">
+        <h3>Build Cyclist</h3>
+        <p>Target: 200W FTP + 75% S&M</p>
+        <div class="phase-actions">
+          <button onclick="switchRadar('foundation')">VIEW TARGETS</button>
+          <button class="gold" onclick="showCert('foundation')">CERTIFICATE</button>
+        </div>
+      </div>
+
+      <div class="phase-block" id="block-build">
+        <h3>Race Prepped</h3>
+        <p>Target: 240W FTP + 75% S&M</p>
+        <div class="phase-actions">
+          <button onclick="switchRadar('build')">VIEW TARGETS</button>
+          <button class="gold" onclick="showCert('build')">CERTIFICATE</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="prediction-container">
+        <div class="prediction-header">
+            <h2 style="margin:0; text-transform:uppercase; color: #fff;">Race Projections</h2>
+            <div class="race-toggle-box">
+                <span style="color:#a0b0c0; text-transform: uppercase;">Mode:</span>
+                <span style="color:#fff; font-weight:bold; margin-left:5px;">SOLO + RACE</span>
+            </div>
+        </div>
+
+        <table class="prediction-table">
+            <thead>
+                <tr>
+                    <th>Event (Distance)</th>
+                    <th>Solo (100% Effort)</th>
+                    <th>Race (15% Draft)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="event-name">Ride Joburg (97km) <br><small>@ 240W FTP</small></td>
+                    <td class="time-solo">3h 25m</td>
+                    <td class="time-race">2h 55m</td>
+                </tr>
+                <tr>
+                    <td class="event-name">Cape Cycle Tour (109km) <br><small>@ 240W FTP</small></td>
+                    <td class="time-solo">3h 55m</td>
+                    <td class="time-race">3h 20m</td>
+                </tr>
+                <tr>
+                    <td class="event-name">Ride Joburg (97km) <br><small>@ 200W FTP</small></td>
+                    <td class="time-solo">3h 50m</td>
+                    <td class="time-race">3h 15m</td>
+                </tr>
+                <tr>
+                    <td class="event-name">Cape Cycle Tour (109km) <br><small>@ 200W FTP</small></td>
+                    <td class="time-solo">4h 25m</td>
+                    <td class="time-race">3h 45m</td>
+                </tr>
+                <tr>
+                    <td class="event-name">Ride Joburg (97km) <br><small>@ 160W FTP</small></td>
+                    <td class="time-solo">4h 35m</td>
+                    <td class="time-race">3h 55m</td>
+                </tr>
+                <tr>
+                    <td class="event-name">Cape Cycle Tour (109km) <br><small>@ 160W FTP</small></td>
+                    <td class="time-solo">5h 15m</td>
+                    <td class="time-race">4h 30m</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="drafting-note">
+            💡 <strong>THE DRAFT EFFECT:</strong> In a race, drafting in a bunch significantly reduces wind resistance, typically shaving <strong>15-20%</strong> off your solo time. Training focuses on solo power; race day rewards your strategy.
+        </div>
+    </div>
+
+    <img src="assets/values.png" alt="FTP Values Chart" style="width:100%; max-width:800px; display:block; margin:30px auto; border-radius:12px; border:2px solid #00B4D8;">
+  </main>
+
+  <div id="cert-modal">
+    <div class="modal-content">
+      <img src="assets/94.7.png" class="cert-logo" alt="94.7 Logo">
+      <h1 style="margin:0; color: var(--primary-blue);">Certificate of Achievement</h1>
+      <p style="font-size: 1.2rem; margin: 10px 0;">Couch to 94.7</p>
+      
+      <div id="cert-body"></div>
+
+      <div class="quote">
+        "If you know neither the enemy nor yourself, you will succumb in every battle"<br>— Sun Tzu
+      </div>
+      
+      <button class="close-btn" onclick="closeCertModal()">CLOSE</button>
+    </div>
+  </div>
+
+<script>
+  let strengthRadar = null;
+  let cyclingRadar = null;
+  const BENCHMARKS = { ftp: 240, pushups: 25, squats: 40, hipFlexor: 60, hamstring: 60, plank: 60 };
+
+  function getLatestData() {
+    const history = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
+    return history.length > 0 ? history[history.length - 1] : null;
+  }
+
+  function calculateMetrics(data) {
+    if (!data) return { strength: 0, flex: 0, endurance: 0, overall: 0 };
+    
+    const s = (((data.pushups/BENCHMARKS.pushups) + (data.squats/BENCHMARKS.squats)) / 2) * 100;
+    const f = (((data.hipFlexor/BENCHMARKS.hipFlexor) + (data.hamstring/BENCHMARKS.hamstring)) / 2) * 100;
+    const e = (data.plank / BENCHMARKS.plank) * 100;
+    const avg = (s + f + e) / 3;
+
+    return { 
+      strength: Math.min(100, Math.round(s)), 
+      flex: Math.min(100, Math.round(f)), 
+      endurance: Math.min(100, Math.round(e)),
+      overall: Math.min(100, Math.round(avg))
+    };
+  }
+
+  function calculateCyclingMetrics(data) {
+    if (!data) return { ftp: 0, tss: 0, if: 0 };
+    return {
+      ftp: data.ftp || 0,
+      tss: data.tss || 0,
+      if: data.if || 0
+    };
+  }
+
+ function estimateRaceTime(ftp) {
+  if (!ftp || ftp <= 0) return "—";
+  
+  // Simple mapping to match prediction table (Joburg solo times)
+  if (ftp >= 240) return "3h 25m";
+  if (ftp >= 200) return "3h 50m";
+  if (ftp >= 160) return "4h 35m";
+  
+  return "—"; // fallback
+}
+
+  function renderRadars() {
+    const data = getLatestData();
+    const sMmetrics = calculateMetrics(data);
+    const cycling = calculateCyclingMetrics(data);
+
+    const sMCtx = document.getElementById('strengthRadar').getContext('2d');
+    if (strengthRadar) strengthRadar.destroy();
+    strengthRadar = new Chart(sMCtx, {
+      type: 'radar',
+      data: {
+        labels: ['Strength', 'Flexibility', 'Endurance'],
+        datasets: [
+          {
+            label: 'Current Status',
+            data: [sMmetrics.strength, sMmetrics.flex, sMmetrics.endurance],
+            backgroundColor: 'rgba(0, 180, 216, 0.2)',
+            borderColor: '#00B4D8',
+            borderWidth: 3
+          },
+          {
+            label: 'Phase Target',
+            data: [75, 75, 75],
+            borderColor: 'rgb(255, 0, 0)',
+            borderDash: [8, 8],
+            fill: false
+          }
+        ]
+      },
+      options: {
+        scales: {
+          r: {
+            min: 0, max: 100,
+            grid: { color: '#444' },
+            pointLabels: { color: '#fff', font: { size: 14 } },
+            ticks: { display: false }
+          }
+        },
+        plugins: { legend: { labels: { color: '#fff' } } }
+      }
+    });
+
+    const cyclingCtx = document.getElementById('cyclingRadar').getContext('2d');
+    if (cyclingRadar) cyclingRadar.destroy();
+    cyclingRadar = new Chart(cyclingCtx, {
+      type: 'radar',
+      data: {
+        labels: ['FTP', 'TSS', 'IF'],
+        datasets: [
+          {
+            label: 'Current Status',
+            data: [cycling.ftp, cycling.tss, cycling.if * 100],
+            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+            borderColor: '#FFD700',
+            borderWidth: 3
+          },
+          {
+            label: 'Phase Target',
+            data: [240, 70, 95],
+            borderColor: 'rgb(255, 0, 0)',
+            borderDash: [8, 8],
+            fill: false
+          }
+        ]
+      },
+      options: {
+        scales: {
+          r: {
+            min: 0, max: 450,
+            grid: { color: '#444' },
+            pointLabels: { color: '#fff', font: { size: 14 } },
+            ticks: { display: false }
+          }
+        },
+        plugins: { legend: { labels: { color: '#fff' } } }
+      }
+    });
+  }
+
+  function showCert(phase) {
+    const data = getLatestData();
+    if (!data) { alert("Complete an assessment first!"); return; }
+
+    const sMmetrics = calculateMetrics(data);
+    const cycling = calculateCyclingMetrics(data);
+    let requiredFTP = phase === 'initial' ? 160 : (phase === 'foundation' ? 200 : 240);
+    
+    if (cycling.ftp < requiredFTP || sMmetrics.overall < 75) {
+      alert(`LOCKED\nRequired: ${requiredFTP}W FTP & 75% Strength/Mobility\n\nCurrent: ${cycling.ftp}W & ${sMmetrics.overall}%`);
+      return;
+    }
+
+    const phaseName = phase === 'initial' ? "Foundation Cyclist" : (phase === 'foundation' ? "Build Cyclist" : "Race Prepped Cyclist");
+
+    document.getElementById('cert-body').innerHTML = `
+      <p style="margin: 20px 0;">This is to certify that the athlete has successfully completed the <br><strong>${phaseName} Phase</strong><br> demonstrating commitment to the cycle race.</p>
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; display: inline-block; width: 100%; box-sizing: border-box;">
+        <strong>S&M Overall:</strong> ${sMmetrics.overall}% | 
+        <strong>FTP:</strong> ${cycling.ftp}W | 
+        <strong>Est. Time:</strong> ${estimateRaceTime(cycling.ftp)}
+      </div>
+    `;
+
+    document.getElementById('cert-modal').style.display = 'flex';
+  }
+
+  function closeCertModal() { document.getElementById('cert-modal').style.display = 'none'; }
+
+  window.onload = () => {
+    const data = getLatestData();
+    const sMmetrics = calculateMetrics(data);
+    const cycling = calculateCyclingMetrics(data);
+
+    if (cycling.ftp >= 240 && sMmetrics.overall >= 75) document.getElementById('block-build').classList.add('active');
+    else if (cycling.ftp >= 200 && sMmetrics.overall >= 75) document.getElementById('block-foundation').classList.add('active');
+    else if (cycling.ftp >= 160 && sMmetrics.overall >= 75) document.getElementById('block-initial').classList.add('active');
+
+    renderRadars();
+  };
+</script>
+</body>
+</html>

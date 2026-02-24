@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>94.7 | Phone Setup & Compatibility Guide</title>
+    <style>
+        :root { --sky-blue: #00B4D8; --success: #2ecc71; --danger: #ff0000; --warning: #ffaa00; }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; line-height: 1.5; }
+
+        /* Navigation Bar */
+        nav { 
+            background: #000; padding: 1rem; display: flex; justify-content: center; flex-wrap: wrap;
+            border-bottom: 3px solid var(--sky-blue); position: sticky; top: 0; z-index: 1000;
+        }
+        nav a { color: var(--muted); text-decoration: none; margin: 5px 12px; font-weight: 900; font-size: 1.2rem; text-transform: uppercase; }
+        nav a:hover { color: #fff; }
+        nav a.active { color: var(--sky-blue); }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+        h1, h2, h3 { color: var(--sky-blue); margin-bottom: 1rem; }
+        h1 { font-size: 2.2rem; text-align: center; margin: 1.5rem 0; }
+        p { margin-bottom: 1rem; font-size: 1.1rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; background: #111; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #444; }
+        th { background: #222; color: var(--sky-blue); font-weight: 900; }
+        td { font-size: 1rem; }
+
+        .tip { background: #1a1a1a; padding: 1rem; border-left: 5px solid var(--warning); margin: 1.5rem 0; font-style: italic; }
+
+        .section { margin-bottom: 2.5rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="Sensor.html" class="unlocked">Sensor</a>
+    <a href="bike-fit.html" class="unlocked">Bike-fit</a> 
+    <a href="setup.html" class="unlocked">Setup</a>
+    <a href="manual.html" class="unlocked">Manual</a>
+   
+    <!-- Add other links as needed -->
+</nav>
+
+<main>
+    <h1>94.7 Outdoor Lab App: Phone Setup & Compatibility Guide</h1>
+
+    <p>Our app is a <strong>Progressive Web App (PWA)</strong> – it runs right in your phone's browser (mostly Chrome on Android, Safari on iOS) without needing to download from a store. This keeps it lightweight and updatable instantly. But to get the full experience (quick launch from home screen, reliable Bluetooth for speed/cadence/power/HR sensors, accurate GPS speed/distance), your phone needs to meet some basics.</p>
+    <div class="note" style="background:#1a1a1a; padding:20px; border-radius:12px; border:2px solid var(--sky-blue); margin:30px 0;">
+  <h3 style="color:var(--sky-blue); margin-bottom:15px;">Why Chrome Must Be Your Default Browser</h3>
+  <p>For the 94.7 app to work smoothly — especially when connecting Bluetooth sensors (like your Saris speed/cadence) and installing the app to your home screen — your phone needs <strong>Google Chrome</strong> set as the default browser.</p>
+  
+  <p><strong>Why Chrome?</strong><br>
+  - Most reliable Bluetooth Web API support<br>
+  - Best Progressive Web App (PWA) installation experience<br>
+  - Other browsers (Samsung Internet, Firefox, Edge) often block or limit Bluetooth pairing in web apps</p>
+  
+  <p><strong>How to set Chrome as default (Android):</strong></p>
+  <ol style="padding-left:20px; line-height:1.6;">
+    <li>Open your phone's <strong>Settings</strong> app</li>
+    <li>Go to <strong>Apps</strong> (or Apps & notifications)</li>
+    <li>Tap <strong>Default apps</strong> (sometimes under Advanced)</li>
+    <li>Tap <strong>Browser app</strong> (or Opening links / Browser)</li>
+    <li>Select <strong>Google Chrome</strong></li>
+  </ol>
+  
+  <p><strong>iOS note:</strong> iOS doesn't have a true "default browser" setting like Android, but make sure you're using Safari or Chrome when accessing the app link. Bluetooth pairing works best in Chrome on iOS too.</p>
+  
+  <p style="color:var(--warning); font-weight:bold;">Do this before trying to connect sensors or install the app to avoid connection issues!</p>
+</div>
+    <div class="section">
+        <h2>1. Adding the App Icon to Your Home Screen (Make It Feel Like a Real App)</h2>
+        <p>This creates a shortcut/icon on your home screen that opens the app full-screen (no browser bars), just like a downloaded app.</p>
+
+        <h3>On Android (Chrome browser – recommended):</h3>
+        <ol>
+            <li>Open Chrome and go to the app URL (e.g., your hosted link for outdoor.html or the main page).</li>
+            <li>Tap the <strong>3-dot menu</strong> (top-right).</li>
+            <li>Select <strong>Add to home screen</strong> (or "Install app" on newer versions – it might pop up automatically after a few visits).</li>
+            <li>Give it a name like "94.7 Outdoor Lab" and tap <strong>Add</strong>.</li>
+            <li>The icon appears on your home screen – drag it where you want.</li>
+            <li><strong>Bonus:</strong> It should launch full-screen without the address bar.</li>
+        </ol>
+
+        <h3>On iPhone/iPad (Safari browser):</h3>
+        <ol>
+            <li>Open Safari and load the app URL.</li>
+            <li>Tap the <strong>Share icon</strong> (square with up-arrow, bottom bar).</li>
+            <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+            <li>Name it (e.g., "94.7 Lab") and tap <strong>Add</strong> (top-right).</li>
+            <li>Icon added to home screen – tap to launch full-screen.</li>
+        </ol>
+
+        <h3>Troubleshooting icon issues:</h3>
+        <ul>
+            <li>If no "Add to home screen" option shows: Visit the site a few times, engage with it (e.g., start a ride simulation), then try again – browsers sometimes need "engagement" to offer PWA install.</li>
+            <li>Wrong/old icon? Clear browser cache/site data or wait for server update (if we add a manifest.json with custom icon later).</li>
+            <li>Icon missing on older phones? Some very old Android/iOS versions don't support PWAs well – see compatibility below.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>2. Bluetooth Sensor Connection – Minimum Phone Requirements</h2>
+        <p>The app uses Web Bluetooth to connect to cycling sensors (speed/cadence, power, heart rate). This only works on supported browsers/versions.</p>
+
+        <h3>Android:</h3>
+        <ul>
+            <li><strong>Minimum:</strong> Android 6.0 (Marshmallow) or newer + Chrome browser.</li>
+            <li><strong>Works best:</strong> Android 10+ (better permissions handling).</li>
+            <li><strong>Won't work on:</strong> Android 5.1 or older – Web Bluetooth isn't supported at all.</li>
+        </ul>
+        <p><strong>Common fixes for connection fails:</strong></p>
+        <ul>
+            <li>Bluetooth ON + Location services ON (required for scanning BLE devices on Android 6–11; newer versions are smarter).</li>
+            <li>No other app connected to the sensor (e.g., close Zwift/Garmin Connect).</li>
+            <li>Grant permissions when prompted (nearby devices + location).</li>
+            <li>Restart phone/Chrome if flaky.</li>
+        </ul>
+
+        <h3>iOS (iPhone/iPad):</h3>
+        <ul>
+            <li><strong>No full Web Bluetooth support</strong> in Safari (as of 2025/2026) – can't reliably connect to most cycling sensors via browser.</li>
+            <li><strong>Workaround:</strong> Use a third-party browser if available, but generally, iOS users may need native apps (like Strava, Garmin Connect) for sensor data instead of our web version.</li>
+            <li>GPS still works fine on iOS 13+.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. GPS Tracking – Minimum Requirements</h2>
+        <p>We use the browser's Geolocation API for live speed, distance, and mapping.</p>
+
+        <h3>Android:</h3>
+        <ul>
+            <li>Works from Android 4.4+ in Chrome, but high-accuracy GPS (using actual GPS chip) needs Android 6+ with Location set to <strong>High accuracy</strong> mode.</li>
+            <li><strong>Old phones (Android 5 or older):</strong> GPS may be slow, inaccurate, or battery-draining – or not work at all in browser.</li>
+        </ul>
+
+        <h3>iOS:</h3>
+        <ul>
+            <li>Works well from iOS 11+ in Safari (high-accuracy with permission).</li>
+        </ul>
+
+        <p><strong>Tips for best GPS:</strong></p>
+        <ul>
+            <li>Set phone location mode to <strong>High accuracy</strong> (GPS + Wi-Fi + mobile).</li>
+            <li>Grant location permission when prompted.</li>
+            <li>Test outdoors with clear sky – indoor/urban canyons can be spotty.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Quick Compatibility Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Phone OS</th>
+                    <th>Minimum Version for Bluetooth</th>
+                    <th>Minimum for Good GPS</th>
+                    <th>Home Screen Icon / PWA</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Android</td>
+                    <td>6.0+ (Marshmallow)</td>
+                    <td>6.0+</td>
+                    <td>Yes (Chrome)</td>
+                    <td>Best overall support</td>
+                </tr>
+                <tr>
+                    <td>Android (old)</td>
+                    <td>Below 6.0</td>
+                    <td>Below 6.0</td>
+                    <td>Partial/No</td>
+                    <td>Won't connect sensors or accurate GPS</td>
+                </tr>
+                <tr>
+                    <td>iOS (iPhone/iPad)</td>
+                    <td>Not supported in Safari</td>
+                    <td>iOS 13+</td>
+                    <td>Yes (Safari)</td>
+                    <td>GPS works, but no Bluetooth sensors via web</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>If your phone's too old (e.g., Android 5 or earlier), the app may load but Bluetooth/GPS won't function properly – time for an upgrade or use a different device for rides.</p>
+    </div>
+
+    <div class="tip">
+        We'll keep updating this guide as browsers improve. If you're having specific issues (e.g., "connects but drops", "no icon shows"), drop details in the community or DM – happy to help debug.
+    </div>
+
+    <p style="text-align: center; margin-top: 2rem; font-weight: bold;">Ride safe, stay aware of your surroundings! 🚴‍♂️</p>
+</main>
+
+</body>
+</html>

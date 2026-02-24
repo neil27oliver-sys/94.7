@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>94.7 | Master Sensor Lab</title>
+    <style>
+        :root { --sky-blue: #00B4D8; --success: #2ecc71; --warning: #f1c40f; }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; padding: 0; }
+        
+        /* Large Navigation */
+        nav { background: #111; padding: 20px; text-align: center; border-bottom: 4px solid var(--sky-blue); }
+        nav a { color: #fff; text-decoration: none; margin: 0 15px; font-size: 1.2rem; text-transform: uppercase; font-weight: 900; }
+        
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; }
+        .card { background: #111; border: 3px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        
+        /* Big Bold Metrics for easy reading from the bike */
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .metric-box { background: #1a1a1a; padding: 25px 10px; border-radius: 12px; text-align: center; border-bottom: 6px solid #333; }
+        .metric-value { display: block; font-size: 3.5rem; font-weight: 900; color: var(--sky-blue); line-height: 1; }
+        .metric-label { font-size: 0.9rem; color: #aaa; text-transform: uppercase; margin-top: 10px; display: block; }
+
+        .btn-pair { width: 100%; background: var(--sky-blue); color: #000; border: none; padding: 25px; font-size: 1.5rem; font-weight: 900; border-radius: 10px; cursor: pointer; text-transform: uppercase; }
+        #bt-status { text-align: center; padding: 15px; font-size: 1.1rem; color: var(--warning); font-weight: bold; }
+        
+        .setup-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 8px; text-transform: uppercase; }
+        select, input { width: 100%; padding: 15px; background: #222; border: 2px solid #444; color: #fff; border-radius: 8px; font-weight: bold; font-size: 1.1rem; }
+        .latency-note { font-size: 0.7rem; color:  #930d0d; text-align: center; margin-top: 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="Sensor.html" class="unlocked">Sensor</a>
+        <a href="bike-fit.html" class="unlocked">Bike-fit</a>
+        <a href="setup.html" class="unlocked">Setup</a>
+        <a href="manual.html" class="unlocked">Manual</a>
+        
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <button class="btn-pair" onclick="connectEverything()">Pair Speed or Wahoo and Heart rate Sensors</button>
+            <div id="bt-status">READY TO SCAN</div>
+            
+            <div class="setup-row">
+                <div>
+                    <label>Rider Height</label>
+                    <select id="aero-profile">
+                        <option value="0.24">Under 100cm (Aero)</option>
+                        <option value="0.30" selected>Over 100cm (Std)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Weight (KG)</label>
+                    <input type="number" id="user-weight" value="80">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-grid">
+                <div class="metric-box"><span class="metric-value" id="m-speed">0.0</span><span class="metric-label">KM/H</span></div>
+                <div class="metric-box"><span class="metric-value" id="m-power">0</span><span class="metric-label">Watts</span></div>
+                <div class="metric-box"><span class="metric-value" id="m-cadence">0</span><span class="metric-label">RPM</span></div>
+                <div class="metric-box"><span class="metric-value" id="m-hr">--</span><span class="metric-label">BPM</span></div>
+            </div>
+         <div class="latency-note">Note: Sensors may have a 3-5 second latency before data updates on screen.</div>   
+        </div>
+        <div class="note" style="background:#222; padding:15px; border-radius:8px; margin:20px 0; text-align:center;">
+  <strong>Important for Bluetooth & App Install</strong><br>
+  Your phone's default browser <strong>must be Google Chrome</strong> for sensors to pair reliably and to add the app to your home screen.<br>
+  <strong>Quick fix:</strong> Go to Phone Settings → Apps → Default apps → Browser app → Select <strong>Chrome</strong>.
+</div>
+    </div>
+
+<script>
+    let lastWheelRevs = 0, lastWheelTime = 0, lastUpdateTS = 0;
+    let liveS = 0, liveP = 0, liveHR = "--", liveC = 0;
+    const wheelCircum = 2.109;
+
+    async function connectEverything() {
+        const status = document.getElementById('bt-status');
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [0x1816, 0x1818, 0x180D, 'cycling_speed_and_cadence', 'cycling_power', 'heart_rate']
+            });
+
+            const server = await device.gatt.connect();
+            status.textContent = "CONNECTED: " + device.name.toUpperCase();
+            status.style.color = "var(--success)";
+
+            // 1. SMART TRAINER (Wahoo Power)
+            try {
+                const pS = await server.getPrimaryService(0x1818);
+                const pC = await pS.getCharacteristic(0x2A63);
+                pC.addEventListener('characteristicvaluechanged', (e) => {
+                    liveP = e.target.value.getInt16(2, true);
+                    lastUpdateTS = Date.now();
+                });
+                await pC.startNotifications();
+            } catch (e) { console.log("Smart Trainer not detected."); }
+
+            // 2. CLASSIC SENSOR (Wheel Speed)
+            try {
+                const service = await server.getPrimaryService(0x1816);
+                const char = await service.getCharacteristic(0x2A5B);
+                char.addEventListener('characteristicvaluechanged', (e) => {
+                    const v = e.target.value;
+                    const flags = v.getUint8(0);
+                    if (flags & 0x01) {
+                        const revs = v.getUint32(1, true);
+                        const time = v.getUint16(5, true);
+                        if (lastWheelTime > 0 && time !== lastWheelTime) {
+                            let dt = (time - lastWheelTime) / 1024;
+                            if (dt < 0) dt += 64; 
+                            liveS = ((revs - lastWheelRevs) * wheelCircum / dt) * 3.6;
+                        }
+                        lastWheelRevs = revs; lastWheelTime = time;
+                        lastUpdateTS = Date.now();
+                    }
+                });
+                await char.startNotifications();
+            } catch (e) { console.log("Speed Sensor not detected."); }
+
+            // 3. HEART RATE
+            try {
+                const hrS = await server.getPrimaryService(0x180D);
+                const hrC = await hrS.getCharacteristic(0x2A37);
+                hrC.addEventListener('characteristicvaluechanged', e => { liveHR = e.target.value.getUint8(1); });
+                await hrC.startNotifications();
+            } catch (e) { console.log("HR not detected."); }
+
+        } catch (err) { status.textContent = "CONN ERROR: " + err.message; }
+    }
+
+    // --- LOGIC ENGINE ---
+    setInterval(() => {
+        const weight = parseFloat(document.getElementById('user-weight').value) || 73;
+        const cda = parseFloat(document.getElementById('aero-profile').value);
+        
+        // Timeout if no signal for 3 seconds
+        if (Date.now() - lastUpdateTS > 3000) { liveS = 0; liveP = 0; }
+
+        let finalS = 0, finalP = 0;
+
+        // SMART MODE: If we have Power, it drives the Speed
+        if (liveP > 0) {
+            finalP = liveP;
+            let vV = Math.pow(liveP / (0.6125 * cda), 1/3);
+            finalS = (vV * 0.98) * 3.6; 
+            document.getElementById('bt-status').textContent = "MODE: SMART TRAINER";
+        } 
+        // CLASSIC MODE: If we have Speed, it drives the Power
+        else if (liveS > 0) {
+            finalS = liveS;
+            const vMS = liveS / 3.6;
+            const pDrag = 0.5 * 1.225 * cda * Math.pow(vMS, 3);
+            const pRoll = 0.005 * weight * 9.81 * vMS;
+            finalP = Math.round((pDrag + pRoll) / 0.98);
+            document.getElementById('bt-status').textContent = "MODE: CLASSIC SENSOR";
+        }
+
+        // Push to screen
+        document.getElementById('m-speed').textContent = finalS.toFixed(1);
+        document.getElementById('m-power').textContent = finalP;
+        document.getElementById('m-hr').textContent = liveHR;
+        liveC = Math.min(125, Math.round(finalS * 3.1));
+        document.getElementById('m-cadence').textContent = liveC;
+
+        // Save for Indoor/Climbs pages
+        localStorage.setItem('speed', finalS.toFixed(1));
+        localStorage.setItem('power', finalP);
+        localStorage.setItem('cadence', liveC);
+        localStorage.setItem('heart-rate', liveHR);
+    }, 1000);
+</script>
+</body>
+</html>

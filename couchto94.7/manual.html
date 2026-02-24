@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Manual | Couch to 94.7</title>
+    <style>
+        :root { 
+            --sky-blue: #00B4D8; 
+            --dark: #0f0f0f; 
+            --card: #1a1a1a; 
+            --muted: #a0b0c0;
+        }
+        body { background: var(--dark); color: #f0f0f0; font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; margin: 0; padding: 0; }
+        
+        /* Navigation Bar */
+        nav { 
+            background: #000; padding: 1rem; display: flex; justify-content: center; flex-wrap: wrap;
+            border-bottom: 3px solid var(--sky-blue); position: sticky; top: 0; z-index: 1000;
+        }
+        nav a { color: var(--muted); text-decoration: none; margin: 5px 12px; font-weight: 900; font-size: 1.2rem; text-transform: uppercase; }
+        nav a:hover { color: #fff; }
+        nav a.active { color: var(--sky-blue); }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        
+        header { text-align: center; margin-bottom: 50px; }
+        h1 { color: var(--sky-blue); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 5px; }
+        .version { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+        h2 { color: var(--sky-blue); border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px; text-transform: uppercase; }
+        h3 { color: #fff; margin-top: 25px; border-left: 4px solid var(--sky-blue); padding-left: 15px; }
+
+        .section-box { background: var(--card); padding: 25px; margin: 25px 0; border-radius: 12px; border: 1px solid #333; }
+        .pro-tip { background: rgba(0, 180, 216, 0.1); border-left: 5px solid var(--sky-blue); padding: 20px; border-radius: 0 10px 10px 0; font-style: italic; }
+        
+        .warning-box { border: 2px solid #ff4d4d; color: #ff4d4d; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; margin: 20px 0; }
+
+        ul, ol { padding-left: 20px; }
+        li { margin-bottom: 10px; }
+
+        .footer-note { text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #333; color: var(--muted); font-size: 0.9rem; }
+
+        /* Print/Download Button */
+        .btn-download {
+            display: block; width: fit-content; margin: 40px auto; background: var(--sky-blue); color: #000;
+            padding: 15px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; 
+            text-transform: uppercase; transition: transform 0.2s; cursor: pointer; border: none;
+        }
+        .btn-download:hover { transform: scale(1.05); background: #fff; }
+
+        @media print {
+            nav, .btn-download { display: none; }
+            body { background: white; color: black; }
+            .section-box { border: 1px solid #ccc; background: white; }
+            h1, h2, h3 { color: #007791; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="Sensor.html" class="unlocked">Sensor</a>
+    <a href="bike-fit.html" class="unlocked">Bike-fit</a>
+    <a href="setup.html" class="unlocked">Setup</a>
+    <a href="manual.html" class="unlocked">Manual</a>
+</nav>
+
+<div class="container">
+    <header>
+        <h1>Couch to 94.7</h1>
+        <div class="version">Final User Manual | Version 1.0 | © 2026 Neil Oliver</div>
+        <p>Your complete training companion for the Momentum 94.7, Ride Joburg, and Cape Cycle Tour.</p>
+    </header>
+
+    <div class="warning-box">
+        TECHNICAL REQUIREMENT: Bluetooth sensors require an HTTPS connection and Google Chrome.
+    </div>
+
+    <section>
+        <h2>Background & Core Idea</h2>
+        <div class="section-box">
+            <p>Couch to 94.7 is a progressive, 12-week data-driven program designed to guide beginners to race-ready fitness. The app addresses inconsistent training and mental barriers through three distinct phases: Foundation, Build, and Race Prep.</p>
+            <ul>
+                <li><strong>Foundation (Weeks 1-4):</strong> Building the aerobic base.</li>
+                <li><strong>Build (Weeks 5-8):</strong> Increasing intensity and strength.</li>
+                <li><strong>Race Prep (Weeks 9-12):</strong> Peaking power for the big day.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>The Application Driver: FTP</h2>
+        <div class="section-box">
+            <p><strong>Functional Threshold Power (FTP)</strong> is the maximum average power (Watts) you can sustain for one hour. This single number calibrates every workout in the app to your specific ability.</p>
+            <ul>
+                <li><strong>Why it matters:</strong> As your FTP rises (e.g., from 180W to 240W), the "Indoor" workouts automatically become harder to ensure constant growth.</li>
+                <li><strong>TSS (Training Stress Score):</strong> Measures the physical load of your ride.</li>
+                <li><strong>IF (Intensity Factor):</strong> Shows how hard the ride was relative to your FTP (1.0 = Max effort).</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>Step-by-Step Setup</h2>
+        
+        <h3>1. Sensor & Equipment Setup</h3>
+        <p>Navigate to the <strong>Sensors</strong> section. Tap "Pair Sensors" and ensure your Heart Rate, Cadence, or Power Meter (e.g., KICKR CORE) shows as "CONNECTED." Use the <strong>Bike Fit Optimization Guide</strong> to adjust saddle height and reach before your first long ride.</p>
+
+        <h3>2. Set Up Your Bike & Weight Details</h3>
+
+<p>To make indoor power estimates realistic (matching your real outdoor riding feel), go to the new <strong>Setup</strong> page and enter your details:</p>
+
+<ol>
+    <li><strong>Rider Weight</strong> – Enter your body weight from the scale (e.g. 72 kg). This is just you – do not include bike, kit or gear here.</li>
+    <li><strong>Bike Type</strong> – Select your bike type (Road, Gravel, Mountain, etc.). This auto-fills a realistic bike weight.</li>
+    <li><strong>Bike Weight</strong> – Confirm or adjust the bike weight (including pedals, wheels, etc.). Defaults update based on bike type.</li>
+    <li><strong>Kit & Accessories</strong> – Add weight for shoes, bottles, lights, computer, etc. (default ~4 kg).</li>
+    <li><strong>Road Surface / Rolling Factor</strong> – Choose Smooth, Average, or Rough road – this adds an equivalent kg for real-world rolling resistance (default Average = +5 kg).</li>
+</ol>
+
+<p>The page shows your live <strong>Total All-In Weight</strong> at the bottom (rider + bike + kit + road factors). Example: 93 kg.</p>
+
+<p><strong>Save Setup</strong> – Press SAVE SETUP to store your total for the Indoor page. The app will use this weight automatically for power estimates.</p>
+
+<p><strong>Important:</strong> You can change any value anytime (e.g. new bike, different tires, or if indoor feel is off). The app always uses whatever you last saved. This makes indoor training match your real outdoor effort more closely.</p>
+
+<p><strong>Tip:</strong> Use realistic numbers – weigh your bike fully kitted if possible. Repeat setup if your gear changes.</p>
+
+<p><strong>Next step: FTP Test</strong></p>
+<p>Go to <strong>Indoor</strong> and select the "FTP Test." This 20-minute all-out effort will define your training zones. Once done, go to the <strong>Assessment</strong> page and enter your values for Cycling and Strength (Push-ups, Squats, Plank).</p>
+<div class="tip-box" style="background:#222; padding:20px; border-left:5px solid var(--success); margin:25px 0; border-radius:8px;">
+  <h4 style="color:var(--success); margin-top:0;">Pro Tip: Matching Indoor Feel to Outdoor Rides</h4>
+  <p><strong>Classic trainer owners:</strong> Manually adjust resistance during the ride so it <strong>feels similar</strong> to your real outdoor effort (e.g. same perceived leg burn on climbs, same speed on flats). The app's all-in weight and rolling factors help guide power targets, but feel is king on non-smart trainers.</p>
+  
+</div>
+    
+<h3>3. Dashboard Tracking</h3>
+        <p>The <strong>Dashboard</strong> uses two Radars to visualize your progress. Aim to turn the blue current status area into the red dashed target area. Re-testing every 4 weeks will unlock the <strong>Foundation</strong>, <strong>Build</strong>, and <strong>Race Prepped</strong> certificates.</p>
+    </section>
+
+    <section>
+        <h2>Training Programs</h2>
+        <div class="section-box">
+            <h3>Physical & Stretching</h3>
+            <p>Follow the 12-week calendar: 4 indoor/virtual sessions + 1 outdoor long ride per week. Utilize the <strong>Stretching</strong> section for the "Hip Flexor Lunge" and other routines to counter repetitive cycling stress.</p>
+            
+            <h3>Virtual Climbs</h3>
+            <p>Use the <strong>Climbs</strong> page to simulate real-world inclines like Joeys or Summit. The physics engine calculates your "Virtual Speed" based on your weight and the gradient.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>Neil's Race-Day Wisdom</h2>
+        <div class="pro-tip">
+            <strong>"Nothing new on race day."</strong> Trust your training, breathe through the hard bits, and remember: finishing strong beats finishing fast every time.
+        </div>
+
+        <h3>Hydration & Nutrition</h3>
+        <ul>
+            <li><strong>Hydration:</strong> Aim for clear urine 48 hours before the start. No alcohol for 4 days prior.</li>
+            <li><strong>Carb Loading:</strong> Load pasta, rice, and potatoes the week before.</li>
+            <li><strong>During the Race:</strong> Sucrose tablets or gels every 30-45 minutes. Don't wait until you're hungry to eat.</li>
+        </ul>
+
+        <h3>Equipment Tips</h3>
+        <ul>
+            <li><strong>Saddle:</strong> Use a hard saddle and break it in over 4-6 weeks. Soft saddles compress tissue and cause pain over long distances.</li>
+            <li><strong>Magic Drops:</strong> Rhodiola Rosea can help with mental clarity during fatigue—test it during training first!</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Troubleshooting</h2>
+        <div class="section-box">
+            <ul>
+                <li><strong>Bluetooth Issues:</strong> Ensure site is on HTTPS and you are using Chrome. Allow permissions in the popup.</li>
+                <li><strong>No Data:</strong> Sensors only broadcast when moving. You must pedal to see metrics.</li>
+                <li><strong>Data Reset:</strong> All data is stored in your browser's <code>localStorage</code>. Avoid clearing cache unless you want to start over.</li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="footer-note">
+        <p>Questions? Contact Neil on X @NeilOliver1640</p>
+        <p><em>Train Smart, Ride Strong, Own the Race.</em></p>
+        
+        <p style="margin-top: 40px; font-size: 0.9rem; color: var(--muted);">
+    TSS, IF, NP, and FTP are concepts and metrics originally developed and popularized by TrainingPeaks.
+</p>
+
+<p style="margin-top: 20px; font-size: 0.9rem; color: var(--muted);">
+    This app was created in partnership with the following AIs: Grok (lead), Gemini, Sora, and Suno.
+</p>
+    </div>
+
+    <button class="btn-download" onclick="window.print()">Download as PDF / Print Manual</button>
+
+</div>
+
+</body>
+</html>

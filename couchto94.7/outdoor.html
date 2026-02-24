@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>94.7 | Outdoor</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --sky-blue: #00B4D8; --success: #2ecc71; --danger: #ff0000; }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; }
+
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1.5rem; border-bottom: 4px solid #fff; position: sticky; top: 0; z-index: 1000; }
+        nav a { color: #fff; text-decoration: none; font-weight: 900; text-transform: uppercase; font-size: 0.8rem; flex-shrink: 0; }
+        nav a.active { color: var(--sky-blue); text-decoration: underline; }
+
+        main { max-width: 900px; margin: 0 auto; padding: 0.5rem; }
+
+        .glance-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+        .hud-box { background: #000; padding: 1.2rem 0.2rem; border: 3px solid #fff; text-align: center; }
+        .hud-box label { color: #fff; font-size: 0.7rem; font-weight: 900; display: block; margin-bottom: 5px;}
+        .hud-box .value { font-size: 3rem; font-weight: 900; line-height: 1; display: block; }
+
+        #map { height: 320px; width: 100%; border: 3px solid #fff; margin-bottom: 1rem; }
+
+        .metrics-card { background: #000; border: 3px solid #fff; padding: 0.2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #fff; font-size: 0.8rem; padding: 10px; border-bottom: 4px solid #fff;}
+        td { padding: 18px 8px; border-bottom: 1px solid #444; font-size: 1.3rem; font-weight: 900; }
+        .sensor-cell { text-align: right; border-left: 2px solid #444; font-size: 1.5rem; color: #fff; }
+
+        .controls { display: flex; gap: 10px; margin: 1.5rem 0; padding-bottom: 3rem; flex-wrap: wrap; }
+        .btn { flex: 1; padding: 1.5rem; border: 4px solid #fff; font-weight: 900; font-size: 1.3rem; cursor: pointer; text-transform: uppercase; min-width: 140px; }
+        .btn-start { background: var(--success); color: #000; }
+        .btn-stop { background: var(--danger); color: #fff; }
+        .btn-clear { background: #333; color: #fff; border: 4px solid #fff; }
+        .btn-export { background: #3498db; color: #fff; display: none; }
+        
+        #bt-status { text-align: center; padding: 15px; font-weight: 900; color: var(--danger); border: 2px solid #333; margin-top: 10px; font-size: 0.8rem;}
+    </style>
+</head>
+<body>
+
+<nav>
+     <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+       
+</nav>
+
+<main>
+    <div class="glance-container">
+        <div class="hud-box"><label>GPS SPEED</label><span id="speed-hud" class="value">0.0</span></div>
+        <div class="hud-box"><label>HR</label><span id="heart-rate" class="value">--</span></div>
+        <div class="hud-box"><label>GPS DIST</label><span id="dist-hud" class="value">0.0</span></div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="metrics-card">
+        <table>
+            <thead><tr><th>METRIC</th><th style="text-align: right;">VALUE</th></tr></thead>
+            <tbody>
+                <tr><td>AVERAGE SPEED</td><td style="text-align:right" id="gps-avg-val">0.0 km/h</td></tr>
+               
+                <tr><td>AVERAGE HEART RATE</td><td style="text-align:right" id="avg-hr-val">-- bpm</td></tr>
+                <tr><td>DISTANCE</td><td style="text-align:right" id="gps-dist-val">0.0 km</td></tr>
+                <tr><td>TIME</td><td style="text-align:right" id="time-val">0:00</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="bt-status">STATUS: DISCONNECTED</div>
+
+    <div class="controls">
+        <button id="masterStart" class="btn btn-start" onclick="toggleRide()">START RIDE</button>
+        <button class="btn" style="background:#fff; color:#000;" onclick="pairSensors()">CONNECT SENSOR (HR)</button>
+        <button id="exportBtn" class="btn btn-export" onclick="exportGPX()" style="display:none;">EXPORT GPX</button>
+        <button id="clearBtn" class="btn btn-clear" onclick="clearRideData()" style="display:none;">CLEAR DATA</button>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, riderTrack, marker, isTracking = false;
+    let path = [], gpsDistance = 0, lastPos = null;
+    let gpsSpeeds = [], startTime = null;
+    let liveHR = "--";
+    let hrSamples = [];
+    let watchId = null;
+    let positions = []; // for GPX export
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false, attributionControl: false }).setView([-26.1, 28.0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        riderTrack = L.polyline([], { color: '#ff0000', weight: 8 }).addTo(map);
+        marker = L.circleMarker([0,0], { radius: 10, color: '#000', fillColor: '#ff0000', fillOpacity: 1 }).addTo(map);
+    }
+
+    async function pairSensors() {
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['heart_rate']
+            });
+            const server = await device.gatt.connect();
+
+            const hrS = await server.getPrimaryService('heart_rate');
+            const hrC = await hrS.getCharacteristic('heart_rate_measurement');
+            hrC.addEventListener('characteristicvaluechanged', e => {
+                liveHR = e.target.value.getUint8(1);
+                document.getElementById('heart-rate').innerText = liveHR;
+                if (isTracking && liveHR > 0) hrSamples.push(liveHR);
+                updateStats();
+            });
+            await hrC.startNotifications();
+
+            document.getElementById('bt-status').innerText = "CONNECTED: HR (" + (device.name || "Sensor") + ")";
+            document.getElementById('bt-status').style.color = "#2ecc71";
+        } catch (err) {
+            document.getElementById('bt-status').innerText = "CONN ERROR: " + err.message;
+        }
+    }
+
+    function updateStats() {
+        const avgSpeed = gpsSpeeds.length ? (gpsSpeeds.reduce((a,b)=>a+b,0)/gpsSpeeds.length).toFixed(1) : "0.0";
+        document.getElementById('gps-avg-val').innerText = avgSpeed + " km/h";
+
+        let avgPower = 0;
+        if (avgSpeed > 5) {
+            const v = parseFloat(avgSpeed) / 3.6; // m/s
+            const aero = 0.5 * 1.225 * 0.32 * Math.pow(v, 3);
+            const rolling = 70 + (v * 7);
+            avgPower = Math.round(aero + rolling);
+        }
+        document.getElementById('avg-pwr-val').innerText = avgPower + " W";
+
+        const avgHR = hrSamples.length ? Math.round(hrSamples.reduce((a,b)=>a+b,0)/hrSamples.length) : "--";
+        document.getElementById('avg-hr-val').innerText = avgHR + (avgHR !== "--" ? " bpm" : "");
+
+        document.getElementById('gps-dist-val').innerText = gpsDistance.toFixed(1) + " km";
+
+        if (startTime) {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const min = Math.floor(elapsed / 60);
+            const sec = elapsed % 60;
+            document.getElementById('time-val').innerText = `${min}:${sec.toString().padStart(2,'0')}`;
+        } else {
+            document.getElementById('time-val').innerText = "0:00";
+        }
+    }
+
+    function toggleRide() {
+        const startBtn = document.getElementById('masterStart');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        if (!isTracking) {
+            isTracking = true;
+            startTime = Date.now();
+            gpsSpeeds = [];
+            hrSamples = [];
+            gpsDistance = 0;
+            lastPos = null;
+            path = [];
+            positions = [];
+            startBtn.innerText = "STOP RIDE";
+            startBtn.classList.remove('btn-start');
+            startBtn.classList.add('btn-stop');
+            exportBtn.style.display = 'none';
+            clearBtn.style.display = 'none';
+
+            watchId = navigator.geolocation.watchPosition(pos => {
+                if (!isTracking) return;
+                liveGpsS = (pos.coords.speed * 3.6) || 0;
+                if (liveGpsS > 1) gpsSpeeds.push(liveGpsS);
+
+                if (lastPos) gpsDistance += map.distance(lastPos, [pos.coords.latitude, pos.coords.longitude]) / 1000;
+                lastPos = [pos.coords.latitude, pos.coords.longitude];
+
+                // Save position for GPX
+                positions.push({
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude,
+                    time: new Date().toISOString(),
+                    hr: liveHR !== "--" ? parseInt(liveHR) : null
+                });
+
+                path.push(lastPos);
+                riderTrack.setLatLngs(path);
+                marker.setLatLng(lastPos);
+                map.panTo(lastPos);
+
+                document.getElementById('speed-hud').innerText = liveGpsS.toFixed(1);
+                document.getElementById('dist-hud').innerText = gpsDistance.toFixed(1);
+                updateStats();
+            }, err => {
+                alert("GPS error: " + err.message);
+            }, { enableHighAccuracy: true });
+        } else {
+            isTracking = false;
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            startBtn.innerText = "START RIDE";
+            startBtn.classList.remove('btn-stop');
+            startBtn.classList.add('btn-start');
+            exportBtn.style.display = 'inline-block';
+            clearBtn.style.display = 'inline-block';
+        }
+    }
+
+    function exportGPX() {
+        if (positions.length === 0) {
+            alert("No ride data to export");
+            return;
+        }
+
+        let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="94.7 App" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <name>Ride ${new Date().toLocaleString()}</name>
+    <trkseg>`;
+
+        positions.forEach(p => {
+            gpx += `
+      <trkpt lat="${p.lat}" lon="${p.lon}">
+        <time>${p.time}</time>`;
+            if (p.hr) gpx += `<extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>${p.hr}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>`;
+            gpx += `</trkpt>`;
+        });
+
+        gpx += `
+    </trkseg>
+  </trk>
+</gpx>`;
+
+        const blob = new Blob([gpx], {type: 'application/gpx+xml'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ride_${new Date().toISOString().slice(0,10)}.gpx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function clearRideData() {
+        if (!confirm("Clear all ride data?")) return;
+
+        gpsDistance = 0;
+        gpsSpeeds = [];
+        hrSamples = [];
+        path = [];
+        lastPos = null;
+        liveGpsS = 0;
+        liveHR = "--";
+        startTime = null;
+        positions = [];
+
+        riderTrack.setLatLngs([]);
+        marker.setLatLng([0,0]);
+        map.setView([-26.1, 28.0], 13);
+
+        document.getElementById('speed-hud').innerText = "0.0";
+        document.getElementById('dist-hud').innerText = "0.0";
+        document.getElementById('gps-avg-val').innerText = "0.0 km/h";
+        document.getElementById('avg-pwr-val').innerText = "0 W";
+        document.getElementById('avg-hr-val').innerText = "-- bpm";
+        document.getElementById('gps-dist-val').innerText = "0.0 km";
+        document.getElementById('time-val').innerText = "0:00";
+
+        document.getElementById('exportBtn').style.display = 'none';
+        document.getElementById('clearBtn').style.display = 'none';
+
+        const btn = document.getElementById('masterStart');
+        btn.innerText = "START RIDE";
+        btn.classList.remove('btn-clear');
+        btn.classList.add('btn-start');
+        btn.onclick = toggleRide;
+    }
+
+    window.onload = function() {
+        initMap();
+        updateStats();
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Climbs | Couch to 94.7</title>
+    <style>
+        :root {
+            --sky-blue: #00B4D8; --dark: #0f0f0f; --card: #1a1a1a;
+            --muted: #a0b0c0; --red: #ff4d4d; --green: #2ecc71; --warning: #f1c40f;
+        }
+        body { background: var(--dark); color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; padding: 0; }
+
+        nav { background: #000; padding: 1rem; display: flex; overflow-x: auto; gap: 1rem; border-bottom: 3px solid var(--sky-blue); }
+        nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; flex-shrink: 0; }
+        nav a.active { color: var(--red); }
+         .spotify-btn { background: #1DB954; color: #000; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; display: block; }
+
+        .sensor-config { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; border-left: 6px solid var(--sky-blue); }
+        #bt-status { text-align: center; padding: 12px; font-size: 0.8rem; color: var(--warning); font-weight: bold; text-transform: uppercase; border: 2px solid #333; border-radius: 8px; margin-top: 10px; background: #000; letter-spacing: 1px; }
+        
+        .physics-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .btn-pair { width: 100%; background: var(--sky-blue); color: #000; border: none; padding: 18px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 900; text-transform: uppercase; }
+
+        .input-box label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; font-size: 1.1rem; font-weight: bold; text-align: center; border-radius: 8px; }
+
+        .climb-card { background: var(--card); border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 2px solid #333; }
+        .gradient-display { background: #000; padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; border: 2px solid #444; }
+        #slope-val { font-size: 2.5rem; color: var(--red); font-weight: 900; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat-box { background: #1a1a1a; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--sky-blue); }
+        .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        .stat-value { font-size: 2.4rem; font-weight: 900; color: var(--sky-blue); line-height: 1.1; }
+
+        .btn-start { width: 100%; padding: 22px; background: var(--green); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 1.5rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-running { background: var(--red) !important; color: white !important; }
+        
+        .btn-clear { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; text-transform: uppercase; display: block; margin: 0 auto; }
+        
+        
+        
+
+        .note { font-size: 0.7rem; color: var(--red); text-align: center; margin: 20px 0; font-style: italic; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<nav>
+   <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+        
+   </div>
+    <a href="https://open.spotify.com" target="_blank" class="spotify-btn">SPOTIFY</a>
+</nav>
+
+<div class="container">
+    <div class="sensor-config">
+        <button class="btn-pair" onclick="connectEverything()">1. PAIR SENSORS</button>
+        <div id="bt-status">STATUS: READY TO SCAN</div>
+        
+        <div class="physics-inputs">
+            <div class="input-box">
+                <label>Aero Profile</label>
+                <select id="aero-profile" onchange="saveSettings()">
+                    <option value="0.24">Aero (Racing)</option>
+                    <option value="0.30" selected>Standard (Hoods)</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <label>Weight (Rider + Bike + Kit + Road Factors)kg</label>
+                <input type="number" id="user-weight" value="80" oninput="saveSettings()">
+            </div>
+        </div>
+    </div>
+
+    <div class="climb-card">
+        <div class="input-box">
+            <label>Select Your Mountain</label>
+            <select id="climb-id" onchange="updateClimb()">
+                <option value="0">Flat Road (0%)</option>
+                <option value="4">Rolling Hills (4%)</option>
+                <option value="7">Suikerbosrand (7%)</option>
+                <option value="10">Alpe d'Huez (10%)</option>
+            </select>
+        </div>
+
+        <div class="gradient-display">
+            GRADIENT: <span id="slope-val">0%</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-label">Virtual KM/H</div><div id="m-speed" class="stat-value">0.0</div></div>
+            <div class="stat-box"><div class="stat-label">Watts (Input)</div><div id="m-power" class="stat-value">0</div></div>
+            <div class="stat-box"><div class="stat-label">BPM</div><div id="m-hr" class="stat-value">--</div></div>
+            <div class="stat-box"><div class="stat-label">Trip KM</div><div id="m-dist" class="stat-value">0.00</div></div>
+        </div>
+    </div>
+
+    <button id="startBtn" class="btn-start" onclick="toggleClimb()">START CLIMB</button>
+    <button class="btn-clear" onclick="clearData()">CLEAR DATA</button>
+
+    <div class="note">
+        Note: Bluetooth sensors may take 3-5 seconds to wake up and sync.<br>
+        Virtual Speed is calculated based on your power vs gravity.
+    </div>
+
+   
+
+<script>
+    let rideData = {
+        speed: 0, power: 0, hr: "--", distance: 0, 
+        isClimbing: false, deviceName: "NONE", connectedSensors: []
+    };
+
+    let lastWheelRevs = 0, lastWheelTime = 0, lastSignalTime = 0;
+    const wheelCircum = 2.105;
+
+    function saveSettings() {
+        localStorage.setItem('climb_weight', document.getElementById('user-weight').value);
+        localStorage.setItem('climb_aero', document.getElementById('aero-profile').value);
+    }
+
+    function loadSettings() {
+        if(localStorage.getItem('climb_weight')) document.getElementById('user-weight').value = localStorage.getItem('climb_weight');
+        if(localStorage.getItem('climb_aero')) document.getElementById('aero-profile').value = localStorage.getItem('climb_aero');
+        if(localStorage.getItem('climb_dist')) {
+            rideData.distance = parseFloat(localStorage.getItem('climb_dist'));
+            document.getElementById('m-dist').innerText = rideData.distance.toFixed(2);
+        }
+    }
+
+    function clearData() {
+        if (confirm("Clear all session data?")) {
+            rideData.distance = 0;
+            localStorage.setItem('climb_dist', 0);
+            document.getElementById('m-dist').innerText = "0.00";
+            document.getElementById('m-speed').innerText = "0.0";
+            document.getElementById('m-power').innerText = "0";
+            document.getElementById('m-hr').innerText = "--";
+            rideData.speed = 0;
+            rideData.power = 0;
+            rideData.hr = "--";
+        }
+    }
+
+    function updateClimb() {
+        document.getElementById('slope-val').textContent = document.getElementById('climb-id').value + "%";
+    }
+
+    function toggleClimb() {
+        rideData.isClimbing = !rideData.isClimbing;
+        const btn = document.getElementById('startBtn');
+        btn.innerText = rideData.isClimbing ? "STOP CLIMB" : "START CLIMB";
+        btn.classList.toggle('btn-running');
+    }
+
+    function updateSensorStatus() {
+        const status = document.getElementById('bt-status');
+        let displayText = rideData.deviceName || "UNKNOWN DEVICE";
+        
+        if (rideData.connectedSensors.length > 0) {
+            displayText += " | LIVE: " + rideData.connectedSensors.join(" + ");
+            status.style.color = "var(--green)";
+        } else {
+            displayText = "CONNECTED: " + displayText + " (no sensors active)";
+            status.style.color = "var(--warning)";
+        }
+        
+        status.textContent = displayText;
+    }
+
+    async function connectEverything() {
+        const status = document.getElementById('bt-status');
+        status.textContent = "SCANNING...";
+        status.style.color = "var(--warning)";
+
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [0x1816, 0x1818, 0x180D]
+            });
+            const server = await device.gatt.connect();
+            rideData.deviceName = device.name?.toUpperCase() || "UNKNOWN DEVICE";
+
+            try {
+                const s = await server.getPrimaryService(0x1818);
+                const c = await s.getCharacteristic(0x2A63);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    rideData.power = e.target.value.getInt16(2, true);
+                    lastSignalTime = Date.now();
+                });
+                await c.startNotifications();
+                if (!rideData.connectedSensors.includes("PWR")) rideData.connectedSensors.push("PWR");
+            } catch (e) {}
+
+            try {
+                const s = await server.getPrimaryService(0x1816);
+                const c = await s.getCharacteristic(0x2A5B);
+                c.addEventListener('characteristicvaluechanged', (e) => {
+                    const v = e.target.value;
+                    const revs = v.getUint32(1, true);
+                    const time = v.getUint16(5, true);
+                    if (lastWheelTime > 0 && time !== lastWheelTime) {
+                        let dt = (time - lastWheelTime) / 1024;
+                        if (dt < 0) dt += 64; 
+                        rideData.speed = ((revs - lastWheelRevs) * wheelCircum / dt) * 3.6;
+                    }
+                    lastWheelRevs = revs; lastWheelTime = time;
+                    lastSignalTime = Date.now();
+                });
+                await c.startNotifications();
+                if (!rideData.connectedSensors.includes("SPD")) rideData.connectedSensors.push("SPD");
+            } catch (e) {}
+
+            try {
+                const s = await server.getPrimaryService(0x180D);
+                const c = await s.getCharacteristic(0x2A37);
+                c.addEventListener('characteristicvaluechanged', e => { 
+                    rideData.hr = e.target.value.getUint8(1); 
+                    lastSignalTime = Date.now();
+                });
+                await c.startNotifications();
+                if (!rideData.connectedSensors.includes("HR")) rideData.connectedSensors.push("HR");
+            } catch (e) {}
+
+            updateSensorStatus();
+
+        } catch (err) {
+            status.textContent = "PAIR ERROR – TRY AGAIN";
+            status.style.color = "var(--red)";
+        }
+    }
+
+    setInterval(() => {
+        const weight = parseFloat(document.getElementById('user-weight').value) || 70;
+        const cda = parseFloat(document.getElementById('aero-profile').value) || 0.36;
+        const slope = parseFloat(document.getElementById('climb-id').value) / 100;
+
+        if (Date.now() - lastSignalTime > 4000) { 
+            rideData.speed = 0; 
+            rideData.power = 0; 
+        }
+
+        let currentWatts = 0;
+        let virtualSpeed = 0;
+
+        if (rideData.power > 0) {
+            currentWatts = rideData.power;
+        } else if (rideData.speed > 0) {
+            const vMS = rideData.speed / 3.6;
+            currentWatts = (0.5 * 1.225 * cda * Math.pow(vMS, 3)) + (weight * 9.81 * 0.005 * vMS);
+        }
+
+        if (currentWatts > 10) {
+            let v = 2;
+            for(let i=0; i<10; i++) {
+                let p_calc = (0.5 * 1.225 * cda * Math.pow(v, 3)) + (weight * 9.81 * (0.005 + slope) * v);
+                v = v * Math.pow((currentWatts / p_calc), 0.5);
+            }
+            virtualSpeed = v * 3.6;
+        }
+
+        document.getElementById('m-speed').innerText = virtualSpeed.toFixed(1);
+        document.getElementById('m-power').innerText = Math.round(currentWatts);
+        document.getElementById('m-hr').innerText = rideData.hr;
+
+        if (rideData.isClimbing && virtualSpeed > 0.5) {
+            rideData.distance += (virtualSpeed / 3600);
+            document.getElementById('m-dist').innerText = rideData.distance.toFixed(2);
+            localStorage.setItem('climb_dist', rideData.distance);
+        }
+    }, 1000);
+
+    window.onload = loadSettings;
+</script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>94.7 | Physical Training</title>
+    <style>
+        /* STYLES MATCHING BASELINE */
+        :root {
+            --primary-blue: #0066cc;
+            --light-blue: #00B4D8;
+            --accent-orange: #ff6200;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --light-text: #f4f4f4;
+            --muted-text: #b3b3b3;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        nav {
+            background: #000;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border-bottom: 3px solid var(--primary-blue);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--muted-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        nav a:hover, nav a.active { color: var(--light-blue); }
+
+        .header { text-align: center; padding: 40px 20px; border-bottom: 1px solid #333; }
+        .highlight { color: var(--light-blue); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Training Sections */
+        .section, .phase-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-left: 6px solid var(--primary-blue);
+        }
+
+        h2 { color: var(--light-blue); text-transform: uppercase; letter-spacing: 1px; }
+
+        .goal, .phase-goal {
+            font-size: 1.1rem;
+            color: var(--muted-text);
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .day-card {
+            background: #111;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .day-card h3 { color: var(--primary-blue); margin-top: 0; }
+
+        .phase-list { list-style: none; padding: 0; }
+        .phase-list li {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 8px;
+        }
+
+        .tips {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 98, 0, 0.1);
+            border-left: 5px solid var(--accent-orange);
+            border-radius: 8px;
+        }
+
+        .workout-type {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .exercise-item {
+            display: flex;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+
+        .exercise-item img { width: 40%; object-fit: cover; background: #fff; }
+        .exercise-text { padding: 15px; flex: 1; }
+        .exercise-text h4 { color: var(--light-blue); margin: 0 0 10px; }
+
+        .reps-info {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 180, 216, 0.15);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .exercise-item { flex-direction: column; }
+            .exercise-item img { width: 100%; height: 150px; }
+        }
+    </style>
+</head>
+<body>
+  <nav>
+   <a href="index.html">Home</a>
+        <a href="assesment.html" class="unlocked">Assessment</a>
+        <a href="dashboard.html" class="unlocked">Dashboard</a>
+        <a href="physical.html" class="unlocked">Physical</a>
+        <a href="weight.html" class="unlocked">Bike/Weight</a>
+        <a href="indoor.html" class="unlocked">Indoor</a>
+        <a href="climbs.html" class="unlocked">Climbs</a>
+        <a href="outdoor.html" class="unlocked">Outdoor</a>
+        <a href="streching.html" class="unlocked">Stretching</a>
+        <a href="mindset.html" class="unlocked">Mindset</a>
+        
+</nav>
+    <div class="header">
+        <h1>PHYSICAL <span class="highlight">TRAINING</span></h1>
+        <p>Progressive 12-Week Program – From Couch to 94.7 km Endurance</p>
+    </div>
+
+    <div class="container">
+
+        <section class="section">
+            <h2>Program Overview</h2>
+            <p class="goal">Sustainable build: 5 training days/week (4 indoor/virtual + 1 outdoor weekend). Leave 2 full rest/recovery days. Focus on FTP progression, power and off-bike strength.</p>
+
+            <ul class="phase-list">
+                <li><strong>Phase 1: Foundation (Weeks 1–4)</strong> – Build base. Target ~4:30 hr effort. Indoor rides 40–50 min.</li>
+                <li><strong>Phase 2: Build (Weeks 5–8)</strong> – Add intensity/endurance. Target ~4:00 hr effort. Indoor rides 50–60 min.</li>
+                <li><strong>Phase 3: Race Prep (Weeks 9–12)</strong> – Peak power & speed. Target ~3:30 hr effort. Indoor rides 50–60+ min.</li>
+            </ul>
+
+            <div class="tips">
+                <strong>Key Rules:</strong><br>
+                - Re-test FTP every 4 weeks (end of phase) to unlock next level.<br>
+                - Pair indoor days with off-bike strength 2–3x/week.<br>
+                - Practice race fueling on long weekend rides.<br>
+                - Daily stretching exercises enhance flexibility, improve range of motion, reduce injury risk, and alleviate stiffness.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Suggested Weekly Breakdown</h2>
+            <div class="weekly-grid">
+                <div class="day-card"><h3>Monday</h3><p>Indoor Power: Endurance/Base (Zone 2 steady efforts)</p></div>
+                <div class="day-card"><h3>Tuesday</h3><p>Off-Bike Physical: Core + Legs focus (30–45 min)</p></div>
+                <div class="day-card"><h3>Wednesday</h3><p>Indoor Power: Climbing Power or Speed Intervals</p></div>
+                <div class="day-card"><h3>Thursday</h3><p>Off-Bike Physical: Upper Body + Mobility (30–45 min)</p></div>
+                <div class="day-card"><h3>Friday</h3><p>Rest or Light Indoor Cooldown (20 min easy spin)</p></div>
+                <div class="day-card"><h3>Sat/Sun</h3><p>Outdoor Ride: Long structured day (2–3+ hr with climbs)</p></div>
+            </div>
+        </section>
+
+        <section class="phase-section">
+            <h2>Phase 1: Foundation (Weeks 1–4)</h2>
+            <p class="phase-goal">Build basic strength, stability & injury resistance. Target: ~4:30 hr effort tolerance.</p>
+
+            <div class="workout-type">
+                <h3>Core Workout (3x/week)</h3>
+                <div class="exercise-grid">
+                    <div class="exercise-item">
+                        <img src="assets/plank.png" alt="Plank">
+                        <div class="exercise-text">
+                            <h4>Plank</h4>
+                            <p>Hold core tight, body straight.</p>
+                            <div class="reps-info">3 × 20-30s | Rest 60s</div>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <img src="assets/bird-dog.png" alt="Bird Dog">
+                        <div class="exercise-text">
+                            <h4>Bird Dog</h4>
+                            <p>On all fours, extend opposite arm/leg.</p>
+                            <div class="reps-info">3 × 10 per side | Rest 45s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workout-type">
+                <h3>Legs Workout (2x/week)</h3>
+                <div class="exercise-grid">
+                    <div class="exercise-item">
+                        <img src="assets/squats.png" alt="Squats">
+                        <div class="exercise-text">
+                            <h4>Squats</h4>
+                            <p>Feet shoulder-width, lower to parallel.</p>
+                            <div class="reps-info">3 × 12 reps | Rest 60s</div>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <img src="assets/IP1.png" alt="Lunges">
+                        <div class="exercise-text">
+                            <h4>Lunges</h4>
+                            <p>Step forward, alternate legs.</p>
+                            <div class="reps-info">3 × 10 per leg | Rest 60s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="phase-section">
+            <h2>Phase 2: Build (Weeks 5–8)</h2>
+            <p class="phase-goal">Increase endurance & volume. Target: ~4:00 hr effort. Add bands if available.</p>
+
+            <div class="workout-type">
+                <h3>Core Workout (3x/week)</h3>
+                <div class="exercise-grid">
+                    <div class="exercise-item">
+                        <img src="assets/plank.png" alt="Plank">
+                        <div class="exercise-text">
+                            <h4>Plank</h4>
+                            <div class="reps-info">3 × 30-45s | Rest 60s</div>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <img src="assets/dead-bug.png" alt="Dead Bug">
+                        <div class="exercise-text">
+                            <h4>Dead Bug</h4>
+                            <div class="reps-info">3 × 12 per side | Rest 45s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="phase-section">
+            <h2>Phase 3: Race Prep (Weeks 9–12)</h2>
+            <p class="phase-goal">Peak strength, intensity & power. Target: ~3:30 hr effort.</p>
+
+            <div class="workout-type">
+                <h3>Legs & Power (2x/week)</h3>
+                <div class="exercise-grid">
+                    <div class="exercise-item">
+                        <img src="assets/squats.png" alt="Squats">
+                        <div class="exercise-text">
+                            <h4>Weighted Squats</h4>
+                            <div class="reps-info">3 × 20 reps | Add weights/bands</div>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <img src="assets/calf-raises.png" alt="Calf Raises">
+                        <div class="exercise-text">
+                            <h4>Calf Raises</h4>
+                            <div class="reps-info">3 × 25 reps | Rest 45s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2>Progressive for Cycling Semi Professionals</h2>
+            <div class="exercise-grid">
+                <div class="exercise-item">
+                    <img src="assets/IA1.png" alt="Spiderman Pushups">
+                    <div class="exercise-text">
+                        <h4> Spiderman Pushups</h4>
+                        
+                    </div>
+                </div>
+                <div class="exercise-item">
+                    <img src="assets/IA3.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Hamstring Stretch</h4>
+                       
+                    </div>
+                </div>
+            <div class="exercise-item">
+                    <img src="assets/IA5.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4> Pull Ups</h4>
+                       
+                    </div>
+                </div>
+             <div class="exercise-item">
+                    <img src="assets/I6.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Side Planks   holds</h4>
+                        
+                    </div>
+                </div>   
+                        <div class="exercise-item">
+                    <img src="assets/I8.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Planking Rows (renamed dumbbell rows if weights added later) </h4>
+                       
+                    </div>
+                </div>
+            <div class="exercise-item">
+                    <img src="assets/I9.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Bench Press</h4>
+                        
+                    </div>
+                </div>
+            <div class="exercise-item">
+                    <img src="assets/I10.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Military Press</h4>
+                        
+                        
+                    </div>
+                </div>
+            <div class="exercise-item">
+                    <img src="assets/I11.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Deadlift – reps at bodyweight or estimated</h4>
+                        
+                    </div>
+                </div>
+            <div class="exercise-item">
+                    <img src="assets/I12.png" alt="Hamstring">
+                    <div class="exercise-text">
+                        <h4>Barbell Rows</h4>
+                        
+                    </div>
+                </div>
+                </div>
+                </div>
+            </div>
+        </section>
+        
+
+    </div>
+</body>
+</html>
